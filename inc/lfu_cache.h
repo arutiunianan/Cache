@@ -18,21 +18,17 @@ struct LFU_cache_t {
     struct hash_elem_t {
         it_list iter;
         int     counter;
-        hash_elem_t(it_list it): iter(it),      counter(1) {}
+        hash_elem_t(it_list it): iter(it),      counter(0) {}
         hash_elem_t():           counter(0)                {}
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
     LFU_cache_t(size_t size): max_size(size), curr_size(0) {}
-    /*    max_size  = size;
-        curr_size = 0;
-
-        cache = new std::list<T>[max_size];
-    }*/
 
     bool is_cache_full() {
         return curr_size == max_size;
     }
+
 
     void hash_and_cache_elems_swap(KeyT key1, KeyT key2) {
         T elem_buf         = *(hash[key1].iter);
@@ -44,12 +40,13 @@ struct LFU_cache_t {
         hash[key2].iter = it_buf;
     }
 
-    bool lookup_update(T list_elem, KeyT key) {
+    bool lookup_update(T list_elem) {
+        KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {
             if(is_cache_full()) {
-                hash.erase(cache.back());
-                cache.pop_back();
+                hash.erase(cache.front());
+                cache.pop_front();
             }
             else {
                 curr_size++;
@@ -58,11 +55,13 @@ struct LFU_cache_t {
             cache.push_front(list_elem);
             hash_elem_t hash_elem(cache.begin());
             hash[key] = hash_elem;
-            return false;
+        }
+        else {
+            hash[key].counter++;
         }
         
-        hash[key].counter++;
-        it_list curr_elem_iter = hit->second.iter;
+        //update elem place
+        it_list curr_elem_iter = hash[key].iter;
         it_list last_elem_iter = cache.end();
         last_elem_iter--;
         while(curr_elem_iter != last_elem_iter) {
@@ -70,9 +69,7 @@ struct LFU_cache_t {
             next_elem_iter++;
             int key1 = *curr_elem_iter;
             int key2 = *(next_elem_iter);
-            //std::cout << "\n\n" << key1 << " " << key2 << "\n\n";
             if(hash[key1].counter >= hash[key2].counter) {
-                //std::cout << "\n\n" << key1 << " " << key2 << " " << hash[key1].counter << hash[key2].counter << "\n\n";
                 hash_and_cache_elems_swap(key1, key2);
                 curr_elem_iter++;
             }
@@ -80,10 +77,7 @@ struct LFU_cache_t {
                 break;
             }
         }
-        return true;
-
     }
-
 };
 
 
