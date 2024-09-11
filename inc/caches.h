@@ -5,6 +5,8 @@
 #include <list>
 #include <unordered_map>
 
+
+
 template <typename T, typename KeyT = int>
 struct LFU_cache_t {
     public:
@@ -32,6 +34,16 @@ struct LFU_cache_t {
         return curr_size == max_size;
     }
 
+    void hash_and_cache_elems_swap(KeyT key1, KeyT key2) {
+        T elem_buf         = *(hash[key1].iter);
+        *(hash[key1].iter) = *(hash[key2].iter);
+        *(hash[key2].iter) = elem_buf;
+
+        it_list it_buf  = hash[key1].iter;
+        hash[key1].iter = hash[key2].iter;
+        hash[key2].iter = it_buf;
+    }
+
     bool lookup_update(T list_elem, KeyT key) {
         auto hit = hash.find(key);
         if(hit == hash.end()) {
@@ -48,21 +60,32 @@ struct LFU_cache_t {
             hash[key] = hash_elem;
             return false;
         }
-
+        
         hash[key].counter++;
-        /*if()
-        //auto eltit = hit->second;
-
-        //while(eltit != cache.begin()) {
-            
-        //}
-
-        do {
-
-        } while();*/
+        it_list curr_elem_iter = hit->second.iter;
+        it_list last_elem_iter = cache.end();
+        last_elem_iter--;
+        while(curr_elem_iter != last_elem_iter) {
+            it_list next_elem_iter = curr_elem_iter;
+            next_elem_iter++;
+            int key1 = *curr_elem_iter;
+            int key2 = *(next_elem_iter);
+            //std::cout << "\n\n" << key1 << " " << key2 << "\n\n";
+            if(hash[key1].counter >= hash[key2].counter) {
+                //std::cout << "\n\n" << key1 << " " << key2 << " " << hash[key1].counter << hash[key2].counter << "\n\n";
+                hash_and_cache_elems_swap(key1, key2);
+                curr_elem_iter++;
+            }
+            else {
+                break;
+            }
+        }
+        return true;
 
     }
 
 };
+
+
 
 #endif // #define CACHES_H_

@@ -10,22 +10,22 @@ int main() {
         //std::cout << "Введи " << i << "ое число: ";
         //std::cin  >> num;
         num = i;
-        lfu.lookup_update(num,num);
+        lfu.lookup_update(num, num);
     }
-    //std::list<int>::iterator it = lfu.cache.begin();
+    lfu.lookup_update(2, 2);
+    lfu.lookup_update(3, 3);
+    std::list<int>::iterator it = lfu.cache.begin();
     
-    /*std::cout << "\n";
+    
+    std::cout << "\n";
+    for(int i = 10; i > 0; i--) {
+        std::cout << i << "ое " << *(lfu.hash[i].iter) << " " << lfu.hash[i].counter << "\n";
+    }
+
+    std::cout << "\n";
     for(int i = 0; i < lfu.curr_size; i++) {
-        std::cout << i << "ое " << *(it) << " " << lfu.curr_size << "\n";
+        std::cout << *(it) << " ";
         it++;
-    }*/
-    /*std::cout << "\n";
-    for(int i = 10; i > -1; i--) {
-        std::cout << i << "ое " << *(lfu.hash[i].iter) << " " << lfu.curr_size << "\n";
-        it++;
-    }*/
-    /*if(lfu.cache.begin() == lfu.hash[10].iter) {
-        std::cout << "дааа";
-    }*/
-    
+    }
+    std::cout << "\n";
 }
