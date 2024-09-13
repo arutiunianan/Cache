@@ -1,72 +1,81 @@
 #ifndef PCA_CACHES_H_
 #define PCA_CACHES_H_
 
-#include <iostream>
-#include <list>
-#include <unordered_map>
+#include "cache.h"
 
+int NO_ELEM = 0xD2003;
 
 template <typename T, typename KeyT = int>
-struct PCA_cache_t {
-    public:
+class PCA_cache_t {
+public:
     size_t       max_size;
     size_t       curr_size;
+    size_t       arr_size;
     size_t       hits_counter;
+
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
-    /*struct hash_elem_t {
-        it_list iter;
-        hash_elem_t(it_list it): iter(it),      counter(0) {}
-        hash_elem_t():           counter(0)                {}
-    };*/
-    //std::unordered_map<KeyT, hash_elem_t> hash;
     std::unordered_map<KeyT, it_list> hash;
 
-    //PCA_cache_t(size_t size): max_size(size), curr_size(0), hits_counter(0) {}
-    PCA_cache_t(size_t size): max_size(size), hits_counter(0) {}
+    PCA_cache_t(size_t m_size, size_t a_size): max_size(m_size), 
+                                               arr_size(a_size), 
+                                               curr_size(0), 
+                                               hits_counter(0) {}
 
     bool is_cache_full() {
         return curr_size == max_size;
     }
 
-    /*void hash_and_cache_elems_swap(KeyT key1, KeyT key2) {
-        T elem_buf    = *(hash[key1]);
-        *(hash[key1]) = *(hash[key2]);
-        *(hash[key2]) = elem_buf;
+    T most_far_elem(int* data, size_t i) {
+        std::list<T> buf_cache     = cache;
+        size_t       buf_curr_size = curr_size;
+        bool         flag          = false;
 
-        it_list it_buf  = hash[key1];
-        hash[key1]      = hash[key2];
-        hash[key2]      = it_buf;
-    }*/
+        for(size_t pos = i; pos < arr_size; pos++) {
+            for(size_t j = 0; j < max_size; j++) {
+                it_list elem = std::next(buf_cache.begin(), j);
+                if(data[pos] == *elem) {
+                    buf_cache.erase(elem);
+                    buf_curr_size--;
+                    break;
+                }
+            }
+            if(buf_curr_size == 1){
+                break;
+            }
+        }
+        return buf_cache.back();
+    }
 
-    bool lookup_update(T list_elem) {
-        KeyT key = list_elem; //in this hash: key = value
+    bool lookup_update(int* data, size_t i) {
+        KeyT key = data[i]; //in this hash: key = value
+
         auto hit = hash.find(key);
         if(hit == hash.end()) {
-            if(is_cache_full()) {
-                hash.erase(cache.back());
-                cache.pop_back();
+            if (is_cache_full()) {
+                size_t far_elem = most_far_elem(data, i);
+                cache.erase(hash[far_elem]);
+                hash.erase(far_elem);
             }
             else {
                 curr_size++;
             }
-
-            cache.push_front(list_elem);
-            //hash_elem_t hash_elem(cache.begin());
-            //hash[key] = hash_elem;
+ 
+            cache.push_front(key);
             hash[key] = cache.begin();
-            return false;
+            
         }
-        hits_counter++;
-        //update elem place
-        auto eltit = hit->second;
-        if (eltit != cache.begin()) {
-            cache.splice(cache.begin(), cache, eltit, std::next(eltit));
+        else {
+            hits_counter++;
+
+            auto eltit = hit->second;
+            if (eltit != cache.begin()) {
+                cache.splice(cache.begin(), cache,
+                        eltit, std::next(eltit));
+            }
         }
-        return true;
     }
 };
-
 
 #endif // #define PCA_CACHES_H_

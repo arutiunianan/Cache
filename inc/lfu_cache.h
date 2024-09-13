@@ -1,43 +1,51 @@
-#ifndef CACHES_H_
-#define CACHES_H_
+#ifndef LFU_CACHES_H_
+#define LFU_CACHES_H_
 
-#include <iostream>
-#include <list>
-#include <unordered_map>
-
-
+#include "cache.h"
 
 template <typename T, typename KeyT = int>
-struct LFU_cache_t {
-    public:
+class LFU_cache_t {
+public:
     size_t       max_size;
     size_t       curr_size;
+    size_t       hits_counter;
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
     struct hash_elem_t {
         it_list iter;
-        int     counter;
-        hash_elem_t(it_list it): iter(it),      counter(0) {}
-        hash_elem_t():           counter(0)                {}
+        size_t  counter;
+        hash_elem_t(it_list it): iter(it), 
+                                 counter(1){}
+        hash_elem_t():           counter(0){}
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
-    LFU_cache_t(size_t size): max_size(size), curr_size(0) {}
+    LFU_cache_t(size_t size): max_size(size), 
+                              curr_size(0), 
+                              hits_counter(0) {}
 
     bool is_cache_full() {
         return curr_size == max_size;
     }
 
+    it_list bin_search(it_list current, it_list begin, size_t distance) {
+        it_list middle = std::next(begin, distance / 2);
 
-    void hash_and_cache_elems_swap(KeyT key1, KeyT key2) {
-        T elem_buf         = *(hash[key1].iter);
-        *(hash[key1].iter) = *(hash[key2].iter);
-        *(hash[key2].iter) = elem_buf;
+        if(*middle == cache.back() || middle == cache.end()) {
+            return cache.end();
+        }
 
-        it_list it_buf  = hash[key1].iter;
-        hash[key1].iter = hash[key2].iter;
-        hash[key2].iter = it_buf;
+        it_list next_middle = std::next(middle, 1);
+        if(hash[*middle].counter <= hash[*current].counter) {
+            return bin_search(current, next_middle, distance / 2);
+        }
+
+        if(hash[*current].counter < hash[*next_middle].counter) {
+            return middle;
+        }
+
+        return bin_search(current, begin, distance / 2);
     }
 
     bool lookup_update(T list_elem) {
@@ -57,29 +65,19 @@ struct LFU_cache_t {
             hash[key] = hash_elem;
         }
         else {
+            hits_counter++;
             hash[key].counter++;
         }
-        
+
         //update elem place
         it_list curr_elem_iter = hash[key].iter;
-        it_list last_elem_iter = cache.end();
-        last_elem_iter--;
-        while(curr_elem_iter != last_elem_iter) {
-            it_list next_elem_iter = curr_elem_iter;
-            next_elem_iter++;
-            int key1 = *curr_elem_iter;
-            int key2 = *(next_elem_iter);
-            if(hash[key1].counter >= hash[key2].counter) {
-                hash_and_cache_elems_swap(key1, key2);
-                curr_elem_iter++;
-            }
-            else {
-                break;
-            }
-        }
+        it_list next_elem_iter = std::next(curr_elem_iter,1);
+        cache.splice(bin_search(curr_elem_iter, next_elem_iter, 
+                                std::distance(next_elem_iter, cache.end())), 
+                     cache, 
+                     hash[key].iter);
+        
     }
 };
 
-
-
-#endif // #define CACHES_H_
+#endif // #define LFU_CACHES_H_
