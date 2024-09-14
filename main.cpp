@@ -10,12 +10,12 @@ int main() {
     std::cin >> max_size >> num_of_num;
     int num[num_of_num];
     
-    LFU_cache_t<int> lfu(max_size);
-    PCA_cache_t<int> pca(max_size, num_of_num);
-    
     for(int i = 0; i < num_of_num; i++) {
         std::cin >> num[i];
     }
+
+    LFU_cache_t<int> lfu(max_size, num_of_num, num);
+    PCA_cache_t<int> pca(max_size, num_of_num, num);
 
     for(size_t i = 0; i < num_of_num; i++) {
         lfu.lookup_update(num[i]);

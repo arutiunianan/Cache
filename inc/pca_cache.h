@@ -18,10 +18,27 @@ public:
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
-    PCA_cache_t(size_t m_size, size_t a_size): max_size(m_size), 
-                                               arr_size(a_size), 
-                                               curr_size(0), 
-                                               hits_counter(0) {}
+    std::ofstream log;
+    int           errors;
+
+    PCA_cache_t(size_t m_size, size_t a_size, T* data): 
+        max_size(m_size), 
+        arr_size(a_size), 
+        curr_size(0), 
+        hits_counter(0), 
+        errors(0)         {
+        log.open("logs/pca_log.txt");
+
+        log << "=======================================\n" 
+            << "           PCA CACHE DUMP\n"
+            << "=======================================\n\n";
+        log << "CACHE SIZE: " << m_size << "\n";
+        log << "DATA: ";
+        for(size_t i = 0; i < a_size; i++) {
+            log << data[i] << " ";
+        }
+        log << "\n\n";
+    }
 
     bool is_cache_full() {
         return curr_size == max_size;
@@ -30,7 +47,6 @@ public:
     T most_far_elem(int* data, size_t i) {
         std::list<T> buf_cache     = cache;
         size_t       buf_curr_size = curr_size;
-        bool         flag          = false;
 
         for(size_t pos = i; pos < arr_size; pos++) {
             for(size_t j = 0; j < max_size; j++) {
@@ -48,7 +64,86 @@ public:
         return buf_cache.back();
     }
 
-    bool lookup_update(int* data, size_t i) {
+    void update_elem_place(KeyT key) {
+        if(cache.empty()) {
+            errors |= CACHE_IS_EMPTY;
+        }
+        if(hash.find(key) == hash.end()) {
+            errors |= HASH_HAST_THIS_KEY;
+        }
+        if(errors != 0) {
+            return;
+        }
+
+        auto eltit = hash[key];
+        if (eltit != cache.begin()) {
+            cache.splice(cache.begin(), cache,
+                    eltit, std::next(eltit));
+        }
+    }
+
+    void dump() {
+        static size_t number_of_call = 1;
+	    log <<  "=======================================\nDUMP CALL #" << (number_of_call + 1) / 2 << "." 
+                                                                       << (number_of_call + 1) % 2 + 1 << "\n";
+        if(errors)
+	    {
+		    log << "-------------ERRORS------------\n";
+            if(errors & CACHE_IS_EMPTY)         log << "CACHE IS EMPTY\n";
+		    if(errors & HASH_HAST_THIS_KEY)     log << "HASH HAS'T ELEMENT WITH THIS KEY\n";
+		    if(errors & NEGATIVE_CURR_SIZE)     log << "NEGATIVE CURRENT CACHE SIZE\n";
+	        if(errors & NEGATIVE_MAX_SIZE)      log << "NEGATIVE MAXIMUM CACHE SIZE\n";
+	        if(errors & NEGATIVE_HITS_COUNTER)  log << "NEGATIVE HITS COUNTER \n";
+            if(errors & NEGATIVE_ELEM_COUNTER)  log << "NEGATIVE ELEMENT COUNTER \n";
+            if(errors & NEGATIVE_INDEX_OF_DATA) log << "NEGATIVE INDEX OF DATA\n";
+	        if(errors & NEGATIVE_DATA_SIZE)     log << "NEGATIVE DATA SIZE \n";
+            if(errors & NEGATIVE_ELEM_COUNTER)  log << "DATA IS NULLPTR \n";
+
+		    log << "----------END_OF_ERRORS--------\n";
+	    }
+	    else
+        {
+		    log << "------------NO_ERRORS----------\n";
+            log << "Current Cache\n";
+
+            std::list<int>::iterator it = cache.begin();
+            for(size_t i = 0; i < curr_size; i++) {
+                log << *(it++) << " ";
+            }
+            log << "\n";
+
+        }
+	    log << "=======================================\n\n";
+	    number_of_call++;
+    }
+
+    int chech_errors(int* data, size_t i) {
+        if(data == nullptr) {
+            errors |= DATA_IS_NULLPTR;
+        }
+        if(i < 0) {
+            errors |= NEGATIVE_INDEX_OF_DATA;
+        }
+        if(max_size < 0) {
+            errors |= NEGATIVE_CURR_SIZE;
+        }
+        if(curr_size < 0) {
+            errors |= NEGATIVE_MAX_SIZE;
+        }
+        if(hits_counter < 0) {
+            errors |= NEGATIVE_HITS_COUNTER;
+        }
+        dump();
+        return errors;
+    }
+
+    int lookup_update(T* data, size_t i) {
+        assert(log);
+
+        if(chech_errors(data, i)) {
+            return errors;
+        }
+
         KeyT key = data[i]; //in this hash: key = value
 
         auto hit = hash.find(key);
@@ -64,17 +159,13 @@ public:
  
             cache.push_front(key);
             hash[key] = cache.begin();
-            
         }
         else {
             hits_counter++;
-
-            auto eltit = hit->second;
-            if (eltit != cache.begin()) {
-                cache.splice(cache.begin(), cache,
-                        eltit, std::next(eltit));
-            }
+            update_elem_place(key);
         }
+
+        return chech_errors(data, i);
     }
 };
 
