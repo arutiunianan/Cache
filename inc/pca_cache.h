@@ -10,7 +10,6 @@ public:
     size_t       curr_size;
     size_t       arr_size;
     size_t       hits_counter;
-
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
@@ -30,7 +29,7 @@ public:
         log = fopen("logs/pca_log.txt", "wb");
 
         fprintf(log, "=======================================\n");
-        fprintf(log, "           LFU CACHE DUMP\n");
+        fprintf(log, "           PCA CACHE DUMP\n");
         fprintf(log, "=======================================\n\n");
         fprintf(log, "CACHE SIZE: %d\n", m_size);
         fprintf(log, "DATA: ");
@@ -38,7 +37,20 @@ public:
             fprintf(log,"%d ", data[i] );
         }
         fprintf(log,"\n\n");
-        //log.close();
+    }
+
+    ~PCA_cache_t() {
+        cache.clear();
+        hash.clear();
+
+        max_size     = 0xDEAD;
+        curr_size    = 0xDEAD;
+        arr_size     = 0xDEAD;
+        hits_counter = 0xDEAD;
+
+        fclose(log);
+        number_of_call = 0xDEAD;
+        errors         = 0xDEAD;
     }
 
     bool is_cache_full() {

@@ -44,6 +44,19 @@ public:
         fprintf(log,"\n\n");
     }
 
+    ~LFU_cache_t() {
+        cache.clear();
+        hash.clear();
+
+        max_size     = 0xDEAD;
+        curr_size    = 0xDEAD;
+        hits_counter = 0xDEAD;
+
+        fclose(log);
+        number_of_call = 0xDEAD;
+        errors         = 0xDEAD;
+    }
+
     bool is_cache_full() {
         return curr_size == max_size;
     }
