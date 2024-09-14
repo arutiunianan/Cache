@@ -1,7 +1,7 @@
 #ifndef LFU_CACHES_H_
 #define LFU_CACHES_H_
 
-#include "cache.h"
+#include "log.h"
 
 template <typename T, typename KeyT = int>
 class LFU_cache_t {
@@ -21,25 +21,27 @@ public:
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
-    std::ofstream log;
-    int           errors;
+    FILE*  log;
+    size_t number_of_call;
+    int    errors;
 
     LFU_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
         curr_size(0), 
         hits_counter(0),
-        errors(0)        {
-        log.open("logs/lfu_log.txt");
+        number_of_call(1),
+        errors(0)         {
+        log = fopen("logs/lfu_log.txt", "wb");
 
-        log << "=======================================\n" 
-            << "           LFU CACHE DUMP\n"
-            << "=======================================\n\n";
-        log << "CACHE SIZE: " << m_size << "\n";
-        log << "DATA: ";
+        fprintf(log, "=======================================\n");
+        fprintf(log, "           LFU CACHE DUMP\n");
+        fprintf(log, "=======================================\n\n");
+        fprintf(log, "CACHE SIZE: %d\n", m_size);
+        fprintf(log, "DATA: ");
         for(size_t i = 0; i < a_size; i++) {
-            log << data[i] << " ";
+            fprintf(log,"%d ", data[i] );
         }
-        log << "\n\n";
+        fprintf(log,"\n\n");
     }
 
     bool is_cache_full() {
@@ -48,19 +50,19 @@ public:
 
     it_list bin_search(it_list current, it_list begin, size_t distance) {
         it_list middle = std::next(begin, distance / 2);
-        it_list next_middle = std::next(middle, 1);
-
-        if(hash[*current].counter < 1 || hash[*middle].counter < 1 || hash[*next_middle].counter < 1) {
-            errors |= NEGATIVE_ELEM_COUNTER;
-        }
-        if(errors != 0) {
-            return current;
-        }
-
         if(*middle == cache.back() || middle == cache.end()) {
             return cache.end();
         }
+
+        it_list next_middle = std::next(middle, 1);
         
+        if(hash[*current].counter < 1 || hash[*middle].counter < 1 || hash[*next_middle].counter < 1) {//
+            errors |= NEGATIVE_ELEM_COUNTER;
+        }
+        if(errors) {
+            return current;
+        }
+
         if(hash[*middle].counter <= hash[*current].counter) {
             return bin_search(current, next_middle, distance / 2);
         }
@@ -70,42 +72,6 @@ public:
         }
 
         return bin_search(current, begin, distance / 2);
-    }
-
-
-    void dump() {
-        static size_t number_of_call = 1;
-	    log <<  "=======================================\nDUMP CALL #" << (number_of_call + 1) / 2 << "." 
-                                                                       << (number_of_call + 1) % 2 + 1 << "\n";
-        if(errors)
-	    {
-		    log << "-------------ERRORS------------\n";
-            if(errors & CACHE_IS_EMPTY)         log << "CACHE IS EMPTY\n";
-		    if(errors & HASH_HAST_THIS_KEY)     log << "HASH HAS'T ELEMENT WITH THIS KEY\n";
-		    if(errors & NEGATIVE_CURR_SIZE)     log << "NEGATIVE CURRENT CACHE SIZE\n";
-	        if(errors & NEGATIVE_MAX_SIZE)      log << "NEGATIVE MAXIMUM CACHE SIZE\n";
-	        if(errors & NEGATIVE_HITS_COUNTER)  log << "NEGATIVE HITS COUNTER \n";
-            if(errors & NEGATIVE_ELEM_COUNTER)  log << "NEGATIVE ELEMENT COUNTER \n";
-            if(errors & NEGATIVE_INDEX_OF_DATA) log << "NEGATIVE INDEX OF DATA\n";
-	        if(errors & NEGATIVE_DATA_SIZE)     log << "NEGATIVE DATA SIZE \n";
-            if(errors & NEGATIVE_ELEM_COUNTER)  log << "DATA IS NULLPTR \n";
-
-		    log << "----------END_OF_ERRORS--------\n";
-	    }
-	    else
-        {
-		    log << "------------NO_ERRORS----------\n";
-            log << "Current Cache\n";
-
-            std::list<int>::iterator it = cache.begin();
-            for(size_t i = 0; i < curr_size; i++) {
-                log << *(it++) << " ";
-            }
-            log << "\n";
-
-        }
-	    log << "=======================================\n\n";
-	    number_of_call++;
     }
 
     void update_elem_place(KeyT key) {
@@ -137,7 +103,7 @@ public:
         if(hits_counter < 0) {
             errors |= NEGATIVE_HITS_COUNTER;
         }
-        dump();
+        dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
 

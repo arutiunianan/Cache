@@ -1,9 +1,7 @@
 #ifndef PCA_CACHES_H_
 #define PCA_CACHES_H_
 
-#include "cache.h"
-
-int NO_ELEM = 0xD2003;
+#include "log.h"
 
 template <typename T, typename KeyT = int>
 class PCA_cache_t {
@@ -18,26 +16,29 @@ public:
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
-    std::ofstream log;
-    int           errors;
+    FILE*  log;
+    size_t number_of_call;
+    int    errors;
 
     PCA_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
         arr_size(a_size), 
         curr_size(0), 
-        hits_counter(0), 
-        errors(0)         {
-        log.open("logs/pca_log.txt");
+        hits_counter(0),
+        number_of_call(1), 
+        errors(0)          {
+        log = fopen("logs/pca_log.txt", "wb");
 
-        log << "=======================================\n" 
-            << "           PCA CACHE DUMP\n"
-            << "=======================================\n\n";
-        log << "CACHE SIZE: " << m_size << "\n";
-        log << "DATA: ";
+        fprintf(log, "=======================================\n");
+        fprintf(log, "           LFU CACHE DUMP\n");
+        fprintf(log, "=======================================\n\n");
+        fprintf(log, "CACHE SIZE: %d\n", m_size);
+        fprintf(log, "DATA: ");
         for(size_t i = 0; i < a_size; i++) {
-            log << data[i] << " ";
+            fprintf(log,"%d ", data[i] );
         }
-        log << "\n\n";
+        fprintf(log,"\n\n");
+        //log.close();
     }
 
     bool is_cache_full() {
@@ -82,41 +83,6 @@ public:
         }
     }
 
-    void dump() {
-        static size_t number_of_call = 1;
-	    log <<  "=======================================\nDUMP CALL #" << (number_of_call + 1) / 2 << "." 
-                                                                       << (number_of_call + 1) % 2 + 1 << "\n";
-        if(errors)
-	    {
-		    log << "-------------ERRORS------------\n";
-            if(errors & CACHE_IS_EMPTY)         log << "CACHE IS EMPTY\n";
-		    if(errors & HASH_HAST_THIS_KEY)     log << "HASH HAS'T ELEMENT WITH THIS KEY\n";
-		    if(errors & NEGATIVE_CURR_SIZE)     log << "NEGATIVE CURRENT CACHE SIZE\n";
-	        if(errors & NEGATIVE_MAX_SIZE)      log << "NEGATIVE MAXIMUM CACHE SIZE\n";
-	        if(errors & NEGATIVE_HITS_COUNTER)  log << "NEGATIVE HITS COUNTER \n";
-            if(errors & NEGATIVE_ELEM_COUNTER)  log << "NEGATIVE ELEMENT COUNTER \n";
-            if(errors & NEGATIVE_INDEX_OF_DATA) log << "NEGATIVE INDEX OF DATA\n";
-	        if(errors & NEGATIVE_DATA_SIZE)     log << "NEGATIVE DATA SIZE \n";
-            if(errors & NEGATIVE_ELEM_COUNTER)  log << "DATA IS NULLPTR \n";
-
-		    log << "----------END_OF_ERRORS--------\n";
-	    }
-	    else
-        {
-		    log << "------------NO_ERRORS----------\n";
-            log << "Current Cache\n";
-
-            std::list<int>::iterator it = cache.begin();
-            for(size_t i = 0; i < curr_size; i++) {
-                log << *(it++) << " ";
-            }
-            log << "\n";
-
-        }
-	    log << "=======================================\n\n";
-	    number_of_call++;
-    }
-
     int chech_errors(int* data, size_t i) {
         if(data == nullptr) {
             errors |= DATA_IS_NULLPTR;
@@ -133,7 +99,7 @@ public:
         if(hits_counter < 0) {
             errors |= NEGATIVE_HITS_COUNTER;
         }
-        dump();
+        dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
 
