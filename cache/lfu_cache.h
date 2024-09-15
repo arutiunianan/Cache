@@ -62,9 +62,13 @@ public:
     }
 
     it_list bin_search(it_list current, it_list begin, size_t distance) {
+        printf("%d ", *current);
         it_list middle = std::next(begin, distance / 2);
-        if(*middle == cache.back() || middle == cache.end()) {
+        if((*middle == cache.back() && hash[*middle].counter <= hash[*current].counter) || middle == cache.end()) {
             return cache.end();
+        }
+        if(*middle == cache.back()) {
+            return std::next(cache.end(), -1);
         }
 
         it_list next_middle = std::next(middle, 1);

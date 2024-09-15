@@ -1,3 +1,4 @@
 all:
-	g++ main.cpp -o main
+	g++ main.cpp graph/graph.cpp -o main
 	./main
+	rm -rf *.o main

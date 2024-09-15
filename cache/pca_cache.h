@@ -62,7 +62,7 @@ public:
         size_t       buf_curr_size = curr_size;
 
         for(size_t pos = i; pos < arr_size; pos++) {
-            for(size_t j = 0; j < max_size; j++) {
+            for(size_t j = 0; j < buf_curr_size; j++) {
                 it_list elem = std::next(buf_cache.begin(), j);
                 if(data[pos] == *elem) {
                     buf_cache.erase(elem);
@@ -89,6 +89,7 @@ public:
         }
 
         auto eltit = hash[key];
+        fprintf(log, "\n\n\n%d\n\n\n", key);
         if (eltit != cache.begin()) {
             cache.splice(cache.begin(), cache,
                     eltit, std::next(eltit));

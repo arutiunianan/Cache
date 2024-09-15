@@ -2,7 +2,6 @@
 #define CACHES_H_
 
 #include <iostream>
-#include <fstream>
 #include <list>
 #include <unordered_map>
 
