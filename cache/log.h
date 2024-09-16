@@ -7,7 +7,7 @@
 
 enum Errors
 {
-    NO_ERRORS               = 0,
+    NO_ERRORS              = 0,
     CACHE_IS_EMPTY         = 1 << 0,
     HASH_HAST_THIS_KEY     = 1 << 1,
     NEGATIVE_CURR_SIZE     = 1 << 2,

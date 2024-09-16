@@ -7,8 +7,8 @@ template <typename T, typename KeyT = int>
 class LFU_cache_t {
 public:
     size_t       max_size;
-    size_t       curr_size;
-    size_t       hits_counter;
+    size_t       curr_size    = 0;
+    size_t       hits_counter = 0;
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
@@ -22,15 +22,11 @@ public:
     std::unordered_map<KeyT, hash_elem_t> hash;
 
     FILE*  log;
-    size_t number_of_call;
-    int    errors;
+    size_t number_of_call = 1;
+    int    errors         = 0;
 
     LFU_cache_t(size_t m_size, size_t a_size, T* data): 
-        max_size(m_size), 
-        curr_size(0), 
-        hits_counter(0),
-        number_of_call(1),
-        errors(0)         {
+        max_size(m_size) {
         log = fopen("logs/lfu_log.txt", "wb");
 
         fprintf(log, "=======================================\n");
@@ -62,30 +58,32 @@ public:
     }
 
     it_list bin_search(it_list current, it_list begin, size_t distance) {
-        printf("%d ", *current);
         it_list middle = std::next(begin, distance / 2);
-        if((*middle == cache.back() && hash[*middle].counter <= hash[*current].counter) || middle == cache.end()) {
+        if((*middle == cache.back() && hash[*middle].counter <= hash[*current].counter) 
+            || middle == cache.end()) {
             return cache.end();
         }
         if(*middle == cache.back()) {
             return std::next(cache.end(), -1);
         }
-
+        
         it_list next_middle = std::next(middle, 1);
         
-        if(hash[*current].counter < 1 || hash[*middle].counter < 1 || hash[*next_middle].counter < 1) {//
+        if(hash[*current].counter < 1 
+           || hash[*middle].counter < 1 
+           || hash[*next_middle].counter < 1) {
             errors |= NEGATIVE_ELEM_COUNTER;
         }
         if(errors) {
             return current;
         }
-
+        
         if(hash[*middle].counter <= hash[*current].counter) {
-            return bin_search(current, next_middle, distance / 2);
+            return bin_search(current, next_middle, distance / 2 - 1);
         }
 
         if(hash[*current].counter < hash[*next_middle].counter) {
-            return middle;
+            return middle;   
         }
 
         return bin_search(current, begin, distance / 2);
@@ -130,7 +128,7 @@ public:
         if(chech_errors()) {
             return errors;
         }
-//4 12 1 2 3 4 1 2 5 1 2 4 3 4
+//5 8 0 0 1 0 2 6 10 2
         KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {

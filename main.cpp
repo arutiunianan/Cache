@@ -2,17 +2,34 @@
 #include "cache/pca_cache.h"
 #include "graph/graph.h"
 
-int MAX_SIZE = 10;
-
-int main() {
+int main(int argc, const char* argv[]) {
     int max_size;
     int num_of_num;
+
+    std::ifstream test_file;
+    if(argc == 1) {
+        std::cin >> max_size >> num_of_num;
+    }
+    else if(argc == 2) {
+        test_file.open(argv[1]);
+        test_file >> max_size >> num_of_num;
+    }
+    else {
+        std::cout << "Invalid number of args to program!\n";
+        return 1;
+    }
     
-    std::cin >> max_size >> num_of_num;
     int num[num_of_num];
-    
-    for(int i = 0; i < num_of_num; i++) {
-        std::cin >> num[i];
+
+    if(argc == 1) {
+        for(int i = 0; i < num_of_num; i++) {
+            std::cin >> num[i];
+        }
+    }
+    else {
+        for(int i = 0; i < num_of_num; i++) {
+            test_file >> num[i];
+        }
     }
 
     LFU_cache_t<int> lfu(max_size, num_of_num, num);
@@ -27,6 +44,8 @@ int main() {
     }
 
     std::cout << "\nlfu: " << lfu.hits_counter << "\n";
-    std::cout << "pca: " << pca.hits_counter << "\n";
+    std::cout << "pca: " << pca.hits_counter << "\n\n";
     graph.print_graph();
+
+    return 0;
 }

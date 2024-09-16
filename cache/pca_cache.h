@@ -7,25 +7,21 @@ template <typename T, typename KeyT = int>
 class PCA_cache_t {
 public:
     size_t       max_size;
-    size_t       curr_size;
+    size_t       curr_size    = 0;
+    size_t       hits_counter = 0;
     size_t       arr_size;
-    size_t       hits_counter;
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
     FILE*  log;
-    size_t number_of_call;
-    int    errors;
+    size_t number_of_call = 1;
+    int    errors         = 0;
 
     PCA_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
-        arr_size(a_size), 
-        curr_size(0), 
-        hits_counter(0),
-        number_of_call(1), 
-        errors(0)          {
+        arr_size(a_size) {
         log = fopen("logs/pca_log.txt", "wb");
 
         fprintf(log, "=======================================\n");
