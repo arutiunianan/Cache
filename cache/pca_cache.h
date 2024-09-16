@@ -6,10 +6,13 @@
 template <typename T, typename KeyT = int>
 class PCA_cache_t {
 public:
-    size_t       max_size;
-    size_t       curr_size    = 0;
-    size_t       hits_counter = 0;
-    size_t       arr_size;
+    size_t hits_counter = 0;
+
+private:
+    size_t max_size;
+    size_t curr_size = 0;
+    size_t arr_size;
+
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
@@ -19,6 +22,7 @@ public:
     size_t number_of_call = 1;
     int    errors         = 0;
 
+public:
     PCA_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
         arr_size(a_size) {
@@ -49,6 +53,7 @@ public:
         errors         = 0xDEAD;
     }
 
+private:
     bool is_cache_full() {
         return curr_size == max_size;
     }
@@ -85,7 +90,6 @@ public:
         }
 
         auto eltit = hash[key];
-        fprintf(log, "\n\n\n%d\n\n\n", key);
         if (eltit != cache.begin()) {
             cache.splice(cache.begin(), cache,
                     eltit, std::next(eltit));
@@ -112,6 +116,7 @@ public:
         return errors;
     }
 
+public:
     int lookup_update(T* data, size_t i) {
         assert(log);
 

@@ -6,9 +6,12 @@
 template <typename T, typename KeyT = int>
 class LFU_cache_t {
 public:
-    size_t       max_size;
-    size_t       curr_size    = 0;
-    size_t       hits_counter = 0;
+    size_t hits_counter = 0;
+
+private:
+    size_t max_size;
+    size_t curr_size = 0;
+    
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
@@ -25,6 +28,7 @@ public:
     size_t number_of_call = 1;
     int    errors         = 0;
 
+public:
     LFU_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size) {
         log = fopen("logs/lfu_log.txt", "wb");
@@ -53,6 +57,7 @@ public:
         errors         = 0xDEAD;
     }
 
+private:
     bool is_cache_full() {
         return curr_size == max_size;
     }
@@ -122,13 +127,13 @@ public:
         return errors;
     }
 
+public:
     int lookup_update(T list_elem) {
         assert(log);
 
         if(chech_errors()) {
             return errors;
         }
-//5 8 0 0 1 0 2 6 10 2
         KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {

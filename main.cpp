@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "\nlfu: " << lfu.hits_counter << "\n";
     std::cout << "pca: " << pca.hits_counter << "\n\n";
-    graph.print_graph();
+    //graph.print_graph();
 
     return 0;
 }
