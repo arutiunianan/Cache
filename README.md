@@ -63,6 +63,16 @@ python3.8 test/test_gen.py 100000
 
 Для [теста](test.txt) график частоты попаданий будет иметь такой вид:
 
-<image src="graph/graph.png" width=300px>
+<image src="graph/graph_example.png" width=450px>
+
+А для более простого примера, как
+
+```
+4 12 1 2 3 4 1 2 5 1 2 4 3 4
+```
+
+результат для двух кэшэй почти идентичен:
+
+<image src="graph/graph.png" width=450px>
 
 Так же в папке [logs](logs/) можно поэтапно увидеть как меняется наш кэш во время прохода по потоку.
