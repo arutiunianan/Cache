@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <list>
+#include <fstream>
+#include <assert.h>
 #include <unordered_map>
 
 enum Errors
@@ -21,7 +23,7 @@ enum Errors
 
 
 template <typename T>
-void dump(FILE* log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call ) {
+void dump(FILE* log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call) {
 	    fprintf(log, "=======================================\n");
         fprintf(log, "DUMP CALL #%d.%d\n", (*number_of_call + 1) / 2 , 
                                            (*number_of_call + 1) % 2 + 1);

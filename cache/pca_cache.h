@@ -31,7 +31,7 @@ public:
         fprintf(log, "=======================================\n");
         fprintf(log, "           PCA CACHE DUMP\n");
         fprintf(log, "=======================================\n\n");
-        fprintf(log, "CACHE SIZE: %d\n", m_size);
+        fprintf(log, "CACHE SIZE: %zu\n", m_size);
         fprintf(log, "DATA: ");
         for(size_t i = 0; i < a_size; i++) {
             fprintf(log,"%d ", data[i] );
