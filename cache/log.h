@@ -4,7 +4,7 @@
 #include <iostream>
 #include <list>
 #include <fstream>
-#include <assert.h>
+#include <cassert>
 #include <unordered_map>
 
 enum Errors
@@ -23,38 +23,38 @@ enum Errors
 
 
 template <typename T>
-void dump(FILE* log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call) {
-	    fprintf(log, "=======================================\n");
-        fprintf(log, "DUMP CALL #%d.%d\n", (*number_of_call + 1) / 2 , 
-                                           (*number_of_call + 1) % 2 + 1);
+void dump(std::ofstream& log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call) {
+	    log << "=======================================\n";
+        log  << "DUMP CALL #" << (*number_of_call + 1) / 2 << "." 
+                             << (*number_of_call + 1) % 2 + 1 << "\n";
         if(errors)
 	    {
-		    fprintf(log, "-------------ERRORS------------\n");
-            if(errors & CACHE_IS_EMPTY)         fprintf(log, "CACHE IS EMPTY\n");
-		    if(errors & HASH_HAST_THIS_KEY)     fprintf(log, "HASH HAS'T ELEMENT WITH THIS KEY\n");
-		    if(errors & NEGATIVE_CURR_SIZE)     fprintf(log, "NEGATIVE CURRENT CACHE SIZE\n");
-	        if(errors & NEGATIVE_MAX_SIZE)      fprintf(log, "NEGATIVE MAXIMUM CACHE SIZE\n");
-	        if(errors & NEGATIVE_HITS_COUNTER)  fprintf(log, "NEGATIVE HITS COUNTER \n");
-            if(errors & NEGATIVE_ELEM_COUNTER)  fprintf(log, "NEGATIVE ELEMENT COUNTER \n");
-            if(errors & NEGATIVE_INDEX_OF_DATA) fprintf(log, "NEGATIVE INDEX OF DATA\n");
-	        if(errors & NEGATIVE_DATA_SIZE)     fprintf(log, "NEGATIVE DATA SIZE \n");
-            if(errors & NEGATIVE_ELEM_COUNTER)  fprintf(log, "DATA IS NULLPTR \n");
+		    log  << "-------------ERRORS------------\n";
+            if(errors & CACHE_IS_EMPTY)         log  << "CACHE IS EMPTY\n";
+		    if(errors & HASH_HAST_THIS_KEY)     log  << "HASH HAS'T ELEMENT WITH THIS KEY\n";
+		    if(errors & NEGATIVE_CURR_SIZE)     log  << "NEGATIVE CURRENT CACHE SIZE\n";
+	        if(errors & NEGATIVE_MAX_SIZE)      log  << "NEGATIVE MAXIMUM CACHE SIZE\n";
+	        if(errors & NEGATIVE_HITS_COUNTER)  log  << "NEGATIVE HITS COUNTER \n";
+            if(errors & NEGATIVE_ELEM_COUNTER)  log  << "NEGATIVE ELEMENT COUNTER \n";
+            if(errors & NEGATIVE_INDEX_OF_DATA) log  << "NEGATIVE INDEX OF DATA\n";
+	        if(errors & NEGATIVE_DATA_SIZE)     log  << "NEGATIVE DATA SIZE \n";
+            if(errors & NEGATIVE_ELEM_COUNTER)  log  << "DATA IS NULLPTR \n";
 
-		    fprintf(log, "----------END_OF_ERRORS--------\n");
+		    log  << "----------END_OF_ERRORS--------\n";
 	    }
 	    else
         {
-		    fprintf(log, "------------NO_ERRORS----------\n");
-            fprintf(log, "Current Cache\n");
+		    log  << "------------NO_ERRORS----------\n";
+            log  << "Current Cache\n";
 
             std::list<int>::iterator it = cache.begin();
             for(size_t i = 0; i < curr_size; i++) {
-                fprintf(log, "%d ", *(it++));
+                log  << *(it++) << " ";
             }
-            fprintf(log, "\n");
+            log  << "\n";
 
         }
-	    fprintf(log, "=======================================\n\n");
+	    log  << "=======================================\n\n";
 	    (*number_of_call)++;
     }
 

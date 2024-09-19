@@ -18,7 +18,7 @@ private:
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
-    FILE*  log;
+    std::ofstream log;
     size_t number_of_call = 1;
     int    errors         = 0;
 
@@ -26,17 +26,17 @@ public:
     PCA_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
         arr_size(a_size) {
-        log = fopen("logs/pca_log.txt", "wb");
+        log.open("logs/pca_log.txt");
 
-        fprintf(log, "=======================================\n");
-        fprintf(log, "           PCA CACHE DUMP\n");
-        fprintf(log, "=======================================\n\n");
-        fprintf(log, "CACHE SIZE: %zu\n", m_size);
-        fprintf(log, "DATA: ");
+        log << "=======================================\n";
+        log << "           PCA CACHE DUMP\n";
+        log << "=======================================\n\n";
+        log << "CACHE SIZE: " << m_size << " ";
+        log << "DATA: ";
         for(size_t i = 0; i < a_size; i++) {
-            fprintf(log,"%d ", data[i] );
+            log << data[i] << " ";
         }
-        fprintf(log,"\n\n");
+        log << "\n\n";
     }
 
     ~PCA_cache_t() {
@@ -48,7 +48,7 @@ public:
         arr_size     = 0xDEAD;
         hits_counter = 0xDEAD;
 
-        fclose(log);
+        log.close();
         number_of_call = 0xDEAD;
         errors         = 0xDEAD;
     }

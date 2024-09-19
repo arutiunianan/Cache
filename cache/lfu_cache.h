@@ -24,24 +24,24 @@ private:
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
-    FILE*  log;
+    std::ofstream log;
     size_t number_of_call = 1;
     int    errors         = 0;
 
 public:
     LFU_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size) {
-        log = fopen("logs/lfu_log.txt", "wb");
+        log.open("logs/lfu_log.txt");
 
-        fprintf(log, "=======================================\n");
-        fprintf(log, "           LFU CACHE DUMP\n");
-        fprintf(log, "=======================================\n\n");
-        fprintf(log, "CACHE SIZE: %zu\n", m_size);
-        fprintf(log, "DATA: ");
+        log << "=======================================\n";
+        log << "           LFU CACHE DUMP\n";
+        log << "=======================================\n\n";
+        log << "CACHE SIZE: " << m_size << "\n";
+        log << "DATA: ";
         for(size_t i = 0; i < a_size; i++) {
-            fprintf(log,"%d ", data[i] );
+            log << data[i] << " ";
         }
-        fprintf(log,"\n\n");
+        log << "\n\n";
     }
 
     ~LFU_cache_t() {
@@ -52,7 +52,7 @@ public:
         curr_size    = 0xDEAD;
         hits_counter = 0xDEAD;
 
-        fclose(log);
+        log.close();
         number_of_call = 0xDEAD;
         errors         = 0xDEAD;
     }

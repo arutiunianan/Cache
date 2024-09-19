@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 class Graph {
 public:
