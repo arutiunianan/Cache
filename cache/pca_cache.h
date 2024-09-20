@@ -60,9 +60,10 @@ private:
 
     T most_far_elem(int* data, size_t i) {
         std::list<T> buf_cache     = cache;
-        size_t       buf_curr_size = curr_size;
+        size_t       buf_curr_size = curr_size + 1;
+        buf_cache.push_front(data[i]);
 
-        for(size_t pos = i; pos < arr_size; pos++) {
+        for(size_t pos = i + 1; pos < arr_size; pos++) {
             for(size_t j = 0; j < buf_curr_size; j++) {
                 it_list elem = std::next(buf_cache.begin(), j);
                 if(data[pos] == *elem) {
@@ -112,7 +113,7 @@ private:
         if(hits_counter < 0) {
             errors |= NEGATIVE_HITS_COUNTER;
         }
-        dump<T>(log, errors, cache, curr_size, &number_of_call);
+        //dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
 
@@ -128,8 +129,11 @@ public:
 
         auto hit = hash.find(key);
         if(hit == hash.end()) {
-            if (is_cache_full()) {
+            if(is_cache_full()) {
                 size_t far_elem = most_far_elem(data, i);
+                if(far_elem == data[i]) {
+                    return chech_errors(data, i);
+                }
                 cache.erase(hash[far_elem]);
                 hash.erase(far_elem);
             }

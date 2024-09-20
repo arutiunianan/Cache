@@ -16,17 +16,6 @@ if __name__ == '__main__':
     plt.plot(lfu_array, label = "LFU")
     plt.plot(pca_array, label = "PCA")
 
-    #x = np.arange(lfu_array.size)
-    #xnew = np.linspace (x. min (), x. max (), 200 ) 
-
-    #spl = make_interp_spline (x, lfu_array, k = 3 )
-    #lfu_y = spl(xnew)
-    #spl = make_interp_spline (x, pca_array, k = 3 )
-    #pca_y = spl(xnew)
-    
-    #plt.plot (xnew, lfu_y, label = "LFU")
-    #plt.plot (xnew, pca_y, label = "PCA")
-
     plt.title('Ani Graph<3')
     plt.xlabel('Added elements')
     plt.ylabel('Hits number')

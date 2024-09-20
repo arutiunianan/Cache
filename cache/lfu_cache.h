@@ -123,7 +123,7 @@ private:
         if(hits_counter < 0) {
             errors |= NEGATIVE_HITS_COUNTER;
         }
-        dump<T>(log, errors, cache, curr_size, &number_of_call);
+        //dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
 

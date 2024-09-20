@@ -21,7 +21,6 @@ enum Errors
     DATA_IS_NULLPTR        = 1 << 8
 };
 
-
 template <typename T>
 void dump(std::ofstream& log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call) {
 	    log << "=======================================\n";

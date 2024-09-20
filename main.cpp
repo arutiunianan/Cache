@@ -7,11 +7,11 @@ int main(int argc, const char* argv[]) {
     int num_of_num;
 
     std::ifstream test_file;
-    if(argc == 1) {
+    if(argc == 2) {
         std::cin >> max_size >> num_of_num;
     }
-    else if(argc == 2) {
-        test_file.open(argv[1]);
+    else if(argc == 3){
+        test_file.open(argv[2]);
         test_file >> max_size >> num_of_num;
     }
     else {
@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
     
     int num[num_of_num];
 
-    if(argc == 1) {
+    if(argc == 2) {
         for(int i = 0; i < num_of_num; i++) {
             std::cin >> num[i];
         }
@@ -32,20 +32,23 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    LFU_cache_t<int> lfu(max_size, num_of_num, num);
-    PCA_cache_t<int> pca(max_size, num_of_num, num);
-    Graph graph;
-
-    for(size_t i = 0; i < num_of_num; i++) {
-        lfu.lookup_update(num[i]);
-        pca.lookup_update(num, i);
-
-        graph.add_hits(lfu.hits_counter, pca.hits_counter);
+    //Graph graph;
+    if(atoi(argv[1]) & 1) {
+        LFU_cache_t<int> lfu(max_size, num_of_num, num);
+        for(size_t i = 0; i < num_of_num; i++) {
+            lfu.lookup_update(num[i]);
+        }
+        std::cout << "\nlfu: " << lfu.hits_counter << "\n";
     }
-
-    std::cout << "\nlfu: " << lfu.hits_counter << "\n";
-    std::cout << "pca: " << pca.hits_counter << "\n\n";
-    //graph.print_graph();
+    if(atoi(argv[1]) & 2) {
+        PCA_cache_t<int> pca(max_size, num_of_num, num);
+        for(size_t i = 0; i < num_of_num; i++) {
+            pca.lookup_update(num, i);
+            //graph.add_hits(lfu.hits_counter, pca.hits_counter);
+        }
+        std::cout << "\npca: " << pca.hits_counter << "\n\n";
+        //graph.print_graph();
+    }
 
     return 0;
 }
