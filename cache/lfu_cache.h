@@ -24,24 +24,28 @@ private:
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
-    std::ofstream log;
-    size_t number_of_call = 1;
-    int    errors         = 0;
+    #ifndef OPTIMIZATION
+        std::ofstream log;
+        size_t number_of_call = 1;
+        int    errors         = 0;
+    #endif
 
 public:
-    LFU_cache_t(size_t m_size, size_t a_size, T* data): 
+    LFU_cache_t(size_t m_size, size_t a_size, T* data):
         max_size(m_size) {
-        log.open("logs/lfu_log.txt");
+        #ifndef OPTIMIZATION
+            log.open("logs/lfu_log.txt");
 
-        log << "=======================================\n";
-        log << "           LFU CACHE DUMP\n";
-        log << "=======================================\n\n";
-        log << "CACHE SIZE: " << m_size << "\n";
-        log << "DATA: ";
-        for(size_t i = 0; i < a_size; i++) {
-            log << data[i] << " ";
-        }
-        log << "\n\n";
+            log << "=======================================\n";
+            log << "           LFU CACHE DUMP\n";
+            log << "=======================================\n\n";
+            log << "CACHE SIZE: " << m_size << "\n";
+            log << "DATA: ";
+            for(size_t i = 0; i < a_size; i++) {
+                log << data[i] << " ";
+            }
+            log << "\n\n";
+        #endif
     }
 
     ~LFU_cache_t() {
@@ -52,9 +56,11 @@ public:
         curr_size    = 0xDEAD;
         hits_counter = 0xDEAD;
 
-        log.close();
-        number_of_call = 0xDEAD;
-        errors         = 0xDEAD;
+        #ifndef OPTIMIZATION
+            log.close();
+            number_of_call = 0xDEAD;
+            errors         = 0xDEAD;
+        #endif
     }
 
 private:
@@ -74,14 +80,16 @@ private:
         
         it_list next_middle = std::next(middle, 1);
         
-        if(hash[*current].counter < 1 
-           || hash[*middle].counter < 1 
-           || hash[*next_middle].counter < 1) {
-            errors |= NEGATIVE_ELEM_COUNTER;
-        }
-        if(errors) {
-            return current;
-        }
+        #ifndef OPTIMIZATION
+            if(hash[*current].counter < 1 
+               || hash[*middle].counter < 1 
+               || hash[*next_middle].counter < 1) {
+                errors |= NEGATIVE_ELEM_COUNTER;
+            }
+            if(errors) {
+                return current;
+            }
+        #endif
         
         if(hash[*middle].counter <= hash[*current].counter) {
             return bin_search(current, next_middle, distance / 2 - 1);
@@ -95,15 +103,17 @@ private:
     }
 
     void update_elem_place(KeyT key) {
-        if(cache.empty()) {
-            errors |= CACHE_IS_EMPTY;
-        }
-        if(hash.find(key) == hash.end()) {
-            errors |= HASH_HAST_THIS_KEY;
-        }
-        if(errors) {
-            return;
-        }
+        #ifndef OPTIMIZATION
+            if(cache.empty()) {
+                errors |= CACHE_IS_EMPTY;
+            }
+            if(hash.find(key) == hash.end()) {
+                errors |= HASH_HAST_THIS_KEY;
+            }
+            if(errors) {
+                return;
+            }
+        #endif
 
         it_list curr_elem_iter = hash[key].iter;
         it_list next_elem_iter = std::next(curr_elem_iter,1);
@@ -113,27 +123,32 @@ private:
                      hash[key].iter);
     }
 
-    int chech_errors() {
-        if(max_size < 0) {
-            errors |= NEGATIVE_CURR_SIZE;
+    #ifndef OPTIMIZATION
+        int chech_errors() {
+            if(max_size < 0) {
+                errors |= NEGATIVE_CURR_SIZE;
+            }
+            if(curr_size < 0) {
+                errors |= NEGATIVE_MAX_SIZE;
+            }
+            if(hits_counter < 0) {
+                errors |= NEGATIVE_HITS_COUNTER;
+            }
+            dump<T>(log, errors, cache, curr_size, &number_of_call);
+            return errors;
         }
-        if(curr_size < 0) {
-            errors |= NEGATIVE_MAX_SIZE;
-        }
-        if(hits_counter < 0) {
-            errors |= NEGATIVE_HITS_COUNTER;
-        }
-        //dump<T>(log, errors, cache, curr_size, &number_of_call);
-        return errors;
-    }
+    #endif
 
 public:
     int lookup_update(T list_elem) {
-        assert(log);
+        #ifndef OPTIMIZATION
+            assert(log);
 
-        if(chech_errors()) {
-            return errors;
-        }
+            if(chech_errors()) {
+                return errors;
+            }
+        #endif
+
         KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {
@@ -155,8 +170,10 @@ public:
         }
 
         update_elem_place(key);
-
-        return chech_errors();
+        
+        #ifndef OPTIMIZATION
+            return chech_errors();
+        #endif
     }
 
 };

@@ -18,25 +18,29 @@ private:
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
-    std::ofstream log;
-    size_t number_of_call = 1;
-    int    errors         = 0;
+    #ifndef OPTIMIZATION
+        std::ofstream log;
+        size_t number_of_call = 1;
+        int    errors         = 0;
+    #endif
 
 public:
     PCA_cache_t(size_t m_size, size_t a_size, T* data): 
         max_size(m_size), 
         arr_size(a_size) {
-        log.open("logs/pca_log.txt");
+        #ifndef OPTIMIZATION
+            log.open("logs/pca_log.txt");
 
-        log << "=======================================\n";
-        log << "           PCA CACHE DUMP\n";
-        log << "=======================================\n\n";
-        log << "CACHE SIZE: " << m_size << " ";
-        log << "DATA: ";
-        for(size_t i = 0; i < a_size; i++) {
-            log << data[i] << " ";
-        }
-        log << "\n\n";
+            log << "=======================================\n";
+            log << "           PCA CACHE DUMP\n";
+            log << "=======================================\n\n";
+            log << "CACHE SIZE: " << m_size << " ";
+            log << "DATA: ";
+            for(size_t i = 0; i < a_size; i++) {
+                log << data[i] << " ";
+            }
+            log << "\n\n";
+        #endif
     }
 
     ~PCA_cache_t() {
@@ -48,9 +52,11 @@ public:
         arr_size     = 0xDEAD;
         hits_counter = 0xDEAD;
 
-        log.close();
-        number_of_call = 0xDEAD;
-        errors         = 0xDEAD;
+        #ifndef OPTIMIZATION
+            log.close();
+            number_of_call = 0xDEAD;
+            errors         = 0xDEAD;
+        #endif
     }
 
 private:
@@ -80,15 +86,17 @@ private:
     }
 
     void update_elem_place(KeyT key) {
-        if(cache.empty()) {
-            errors |= CACHE_IS_EMPTY;
-        }
-        if(hash.find(key) == hash.end()) {
-            errors |= HASH_HAST_THIS_KEY;
-        }
-        if(errors != 0) {
-            return;
-        }
+        #ifndef OPTIMIZATION
+            if(cache.empty()) {
+                errors |= CACHE_IS_EMPTY;
+            }
+            if(hash.find(key) == hash.end()) {
+                errors |= HASH_HAST_THIS_KEY;
+            }
+            if(errors != 0) {
+                return;
+            }
+        #endif
 
         auto eltit = hash[key];
         if (eltit != cache.begin()) {
@@ -97,6 +105,7 @@ private:
         }
     }
 
+#ifndef OPTIMIZATION
     int chech_errors(int* data, size_t i) {
         if(data == nullptr) {
             errors |= DATA_IS_NULLPTR;
@@ -113,17 +122,20 @@ private:
         if(hits_counter < 0) {
             errors |= NEGATIVE_HITS_COUNTER;
         }
-        //dump<T>(log, errors, cache, curr_size, &number_of_call);
+        dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
+#endif
 
 public:
     int lookup_update(T* data, size_t i) {
-        assert(log);
+        #ifndef OPTIMIZATION
+            assert(log);
 
-        if(chech_errors(data, i)) {
-            return errors;
-        }
+            if(chech_errors(data, i)) {
+                return errors;
+            }
+        #endif
 
         KeyT key = data[i]; //in this hash: key = value
 
@@ -132,7 +144,11 @@ public:
             if(is_cache_full()) {
                 size_t far_elem = most_far_elem(data, i);
                 if(far_elem == data[i]) {
-                    return chech_errors(data, i);
+                    #ifndef OPTIMIZATION
+                        return chech_errors(data, i);
+                    #else
+                        return 1;
+                    #endif
                 }
                 cache.erase(hash[far_elem]);
                 hash.erase(far_elem);
@@ -149,7 +165,9 @@ public:
             update_elem_place(key);
         }
 
-        return chech_errors(data, i);
+        #ifndef OPTIMIZATION
+            return chech_errors(data, i);
+        #endif
     }
 };
 

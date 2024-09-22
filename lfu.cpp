@@ -5,7 +5,7 @@
 int main() {
     int max_size;
     int num_of_num;
-
+    
     #ifdef TEST
         std::ifstream test_file;
         test_file.open("test/test.txt");
@@ -24,19 +24,11 @@ int main() {
         }
     #endif
 
-    Graph graph;
     LFU_cache_t<int> lfu(max_size, num_of_num, num);
-    PCA_cache_t<int> pca(max_size, num_of_num, num);
     for(int i = 0; i < num_of_num; i++) {
         lfu.lookup_update(num[i]);
-        pca.lookup_update(num, i);
-
-        graph.add_hits(lfu.hits_counter, pca.hits_counter);
     }
-
-    std::cout << "\nlfu: " << lfu.hits_counter << "\n";     
-    std::cout << "\npca: " << pca.hits_counter << "\n\n";
-    graph.print_graph();
+    std::cout << "\nlfu: " << lfu.hits_counter << "\n";
 
     return 0;
 }
