@@ -6,18 +6,21 @@
 template <typename T, typename KeyT = int>
 class LFU_cache_t {
 public:
-    size_t hits_counter = 0;
+    int hits_counter = 0;
 
 private:
-    size_t max_size;
-    size_t curr_size = 0;
+    int min_counter = 0;
+    std::unordered_map<KeyT, std::list<T>> counter_list;
+
+    int max_size;
+    int curr_size = 0;
     
     std::list<T> cache;
 
     using it_list = typename std::list<T>::iterator; 
     struct hash_elem_t {
         it_list iter;
-        size_t  counter;
+        int     counter;
         hash_elem_t(it_list it): iter(it), 
                                  counter(1){}
         hash_elem_t():           counter(0){}
@@ -26,12 +29,12 @@ private:
 
     #ifndef OPTIMIZATION
         std::ofstream log;
-        size_t number_of_call = 1;
+        int    number_of_call = 1;
         int    errors         = 0;
     #endif
 
 public:
-    LFU_cache_t(size_t m_size, size_t a_size, T* data):
+    LFU_cache_t(int m_size, int a_size, T* data):
         max_size(m_size) {
         #ifndef OPTIMIZATION
             log.open("logs/lfu_log.txt");
@@ -41,7 +44,7 @@ public:
             log << "=======================================\n\n";
             log << "CACHE SIZE: " << m_size << "\n";
             log << "DATA: ";
-            for(size_t i = 0; i < a_size; i++) {
+            for(int i = 0; i < a_size; i++) {
                 log << data[i] << " ";
             }
             log << "\n\n";
@@ -68,40 +71,6 @@ private:
         return curr_size == max_size;
     }
 
-    it_list bin_search(it_list current, it_list begin, size_t distance) {
-        it_list middle = std::next(begin, distance / 2);
-        if((*middle == cache.back() && hash[*middle].counter <= hash[*current].counter) 
-            || middle == cache.end()) {
-            return cache.end();
-        }
-        if(*middle == cache.back()) {
-            return std::next(cache.end(), -1);
-        }
-        
-        it_list next_middle = std::next(middle, 1);
-        
-        #ifndef OPTIMIZATION
-            if(hash[*current].counter < 1 
-               || hash[*middle].counter < 1 
-               || hash[*next_middle].counter < 1) {
-                errors |= NEGATIVE_ELEM_COUNTER;
-            }
-            if(errors) {
-                return current;
-            }
-        #endif
-        
-        if(hash[*middle].counter <= hash[*current].counter) {
-            return bin_search(current, next_middle, distance / 2 - 1);
-        }
-
-        if(hash[*current].counter < hash[*next_middle].counter) {
-            return middle;   
-        }
-
-        return bin_search(current, begin, distance / 2);
-    }
-
     void update_elem_place(KeyT key) {
         #ifndef OPTIMIZATION
             if(cache.empty()) {
@@ -115,12 +84,13 @@ private:
             }
         #endif
 
-        it_list curr_elem_iter = hash[key].iter;
-        it_list next_elem_iter = std::next(curr_elem_iter,1);
-        cache.splice(bin_search(curr_elem_iter, next_elem_iter, 
-                                std::distance(next_elem_iter, cache.end())), 
-                     cache, 
-                     hash[key].iter);
+        counter_list[hash[key].counter].remove(key);
+        hash[key].counter++;
+        counter_list[hash[key].counter].push_front(key);
+
+        if(counter_list[min_counter].size() == 0) {
+            min_counter++;
+        }
     }
 
     #ifndef OPTIMIZATION
@@ -153,23 +123,26 @@ public:
         auto hit = hash.find(key);
         if(hit == hash.end()) {
             if(is_cache_full()) {
-                hash.erase(cache.front());
-                cache.pop_front();
+                KeyT erase_key = counter_list[min_counter].back();
+                cache.erase(hash[erase_key].iter);
+                hash.erase(erase_key);
+                counter_list[min_counter].pop_back();
             }
             else {
                 curr_size++;
             }
 
-            cache.push_front(list_elem);
+            min_counter = 1;
+            T add_elem = key;
+            counter_list[min_counter].push_front(key);
+            cache.push_front(add_elem);
             hash_elem_t hash_elem(cache.begin());
             hash[key] = hash_elem;
         }
         else {
             hits_counter++;
-            hash[key].counter++;
+            update_elem_place(key);
         }
-
-        update_elem_place(key);
         
         #ifndef OPTIMIZATION
             return chech_errors();

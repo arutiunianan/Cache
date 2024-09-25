@@ -6,12 +6,12 @@
 template <typename T, typename KeyT = int>
 class PCA_cache_t {
 public:
-    size_t hits_counter = 0;
+    int hits_counter = 0;
 
 private:
-    size_t max_size;
-    size_t curr_size = 0;
-    size_t arr_size;
+    int max_size;
+    int curr_size = 0;
+    int arr_size;
 
     std::list<T> cache;
 
@@ -20,12 +20,12 @@ private:
 
     #ifndef OPTIMIZATION
         std::ofstream log;
-        size_t number_of_call = 1;
+        int    number_of_call = 1;
         int    errors         = 0;
     #endif
 
 public:
-    PCA_cache_t(size_t m_size, size_t a_size, T* data): 
+    PCA_cache_t(int m_size, int a_size, T* data): 
         max_size(m_size), 
         arr_size(a_size) {
         #ifndef OPTIMIZATION
@@ -34,9 +34,9 @@ public:
             log << "=======================================\n";
             log << "           PCA CACHE DUMP\n";
             log << "=======================================\n\n";
-            log << "CACHE SIZE: " << m_size << " ";
+            log << "CACHE SIZE: " << m_size << "\n";
             log << "DATA: ";
-            for(size_t i = 0; i < a_size; i++) {
+            for(int i = 0; i < a_size; i++) {
                 log << data[i] << " ";
             }
             log << "\n\n";
@@ -64,13 +64,13 @@ private:
         return curr_size == max_size;
     }
 
-    T most_far_elem(int* data, size_t i) {
+    T most_far_elem(int* data, int i) {
         std::list<T> buf_cache     = cache;
-        size_t       buf_curr_size = curr_size + 1;
+        int          buf_curr_size = curr_size + 1;
         buf_cache.push_front(data[i]);
 
-        for(size_t pos = i + 1; pos < arr_size; pos++) {
-            for(size_t j = 0; j < buf_curr_size; j++) {
+        for(int pos = i + 1; pos < arr_size; pos++) {
+            for(int j = 0; j < buf_curr_size; j++) {
                 it_list elem = std::next(buf_cache.begin(), j);
                 if(data[pos] == *elem) {
                     buf_cache.erase(elem);
@@ -106,7 +106,7 @@ private:
     }
 
 #ifndef OPTIMIZATION
-    int chech_errors(int* data, size_t i) {
+    int chech_errors(int* data, int i) {
         if(data == nullptr) {
             errors |= DATA_IS_NULLPTR;
         }
@@ -128,7 +128,7 @@ private:
 #endif
 
 public:
-    int lookup_update(T* data, size_t i) {
+    int lookup_update(T* data, int i) {
         #ifndef OPTIMIZATION
             assert(log);
 
@@ -142,7 +142,7 @@ public:
         auto hit = hash.find(key);
         if(hit == hash.end()) {
             if(is_cache_full()) {
-                size_t far_elem = most_far_elem(data, i);
+                int far_elem = most_far_elem(data, i);
                 if(far_elem == data[i]) {
                     #ifndef OPTIMIZATION
                         return chech_errors(data, i);

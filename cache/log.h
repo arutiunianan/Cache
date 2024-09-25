@@ -23,7 +23,7 @@
     };
 
     template <typename T>
-    void dump(std::ofstream& log, int errors, std::list<T> cache, size_t curr_size, size_t* number_of_call) {
+    void dump(std::ofstream& log, int errors, std::list<T> cache, int curr_size, int* number_of_call) {
 	    log << "=======================================\n";
         log  << "DUMP CALL #" << (*number_of_call + 1) / 2 << "." 
                              << (*number_of_call + 1) % 2 + 1 << "\n";
@@ -48,7 +48,7 @@
             log  << "Current Cache\n";
 
             std::list<int>::iterator it = cache.begin();
-            for(size_t i = 0; i < curr_size; i++) {
+            for(int i = 0; i < curr_size; i++) {
                 log  << *(it++) << " ";
             }
             log  << "\n";
