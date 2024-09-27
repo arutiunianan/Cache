@@ -64,25 +64,26 @@ private:
         return curr_size == max_size;
     }
 
-    T most_far_elem(int* data, int i) {
-        std::list<T> buf_cache     = cache;
-        int          buf_curr_size = curr_size + 1;
-        buf_cache.push_front(data[i]);
+    T most_far_elem(T list_elem, std::unordered_map<T, std::list<int>> hash_entry_elem) {
+        T far_elem = -1;
+        if(hash_entry_elem[list_elem].begin() == hash_entry_elem[list_elem].end()) {
+            return list_elem;
+        }
 
-        for(int pos = i + 1; pos < arr_size; pos++) {
-            for(int j = 0; j < buf_curr_size; j++) {
-                it_list elem = std::next(buf_cache.begin(), j);
-                if(data[pos] == *elem) {
-                    buf_cache.erase(elem);
-                    buf_curr_size--;
-                    break;
-                }
-            }
-            if(buf_curr_size == 1){
-                break;
+        it_list elem = cache.end();
+        for(int i = 0; i < curr_size; i++) {
+            elem--;
+            T curr_elem = *elem;
+            if(hash_entry_elem[curr_elem].begin() == hash_entry_elem[curr_elem].end() 
+               || hash_entry_elem[curr_elem].front() >= far_elem) {
+                far_elem = curr_elem;
             }
         }
-        return buf_cache.back();
+        if(hash_entry_elem[list_elem].front() >= far_elem) {
+            return list_elem;
+        }
+
+        return far_elem;
     }
 
     void update_elem_place(KeyT key) {
@@ -106,10 +107,7 @@ private:
     }
 
 #ifndef OPTIMIZATION
-    int chech_errors(int* data, int i) {
-        if(data == nullptr) {
-            errors |= DATA_IS_NULLPTR;
-        }
+    int chech_errors(int i) {
         if(i < 0) {
             errors |= NEGATIVE_INDEX_OF_DATA;
         }
@@ -128,24 +126,42 @@ private:
 #endif
 
 public:
-    int lookup_update(T* data, int i) {
+    int lookup_update(T list_elem, std::unordered_map<T, std::list<int>>& hash_entry_elem, int i) {
         #ifndef OPTIMIZATION
             assert(log);
 
-            if(chech_errors(data, i)) {
+            if(chech_errors(i)) {
                 return errors;
             }
         #endif
 
-        KeyT key = data[i]; //in this hash: key = value
+        KeyT key = list_elem; //in this hash: key = value
+        hash_entry_elem[list_elem].pop_front();
+
+        /*std::list<int>::iterator p = hash_entry_elem[list_elem].begin();
+        std::cout << list_elem <<": ";
+        while(p != hash_entry_elem[list_elem].end()) {
+            std::cout << *p << " ";
+            p++;
+        }
+        std::cout << "\n";
+        
+
+        std::list<int>::iterator pip = hash_entry_elem[list_elem].begin();
+        std::cout << list_elem <<": ";
+        while(pip != hash_entry_elem[list_elem].end()) {
+            std::cout << *pip << " ";
+            pip++;
+        }
+        std::cout << "\n\n";*/
 
         auto hit = hash.find(key);
         if(hit == hash.end()) {
             if(is_cache_full()) {
-                int far_elem = most_far_elem(data, i);
-                if(far_elem == data[i]) {
+                int far_elem = most_far_elem(list_elem, hash_entry_elem);
+                if(far_elem == list_elem) {
                     #ifndef OPTIMIZATION
-                        return chech_errors(data, i);
+                        return chech_errors(i);
                     #else
                         return 1;
                     #endif
@@ -166,7 +182,7 @@ public:
         }
 
         #ifndef OPTIMIZATION
-            return chech_errors(data, i);
+            return chech_errors(i);
         #endif
     }
 };

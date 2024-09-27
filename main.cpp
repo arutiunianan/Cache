@@ -7,6 +7,7 @@
 int main() {
     int max_size;
     int num_of_num;
+    std::unordered_map<int, std::list<int>> hash_entry_elem;
 
     #ifdef TEST
         std::ifstream test_file;
@@ -16,6 +17,7 @@ int main() {
 
         for(int i = 0; i < num_of_num; i++) {
             test_file >> num[i];
+            hash_entry_elem[num[i]].push_back(i);
         }
     #else
         std::cin >> max_size >> num_of_num;
@@ -23,6 +25,7 @@ int main() {
 
         for(int i = 0; i < num_of_num; i++) {
             std::cin >> num[i];
+            hash_entry_elem[num[i]].push_back(i);
         }
     #endif
 
@@ -33,7 +36,7 @@ int main() {
     PCA_cache_t<int> pca(max_size, num_of_num, num);
     for(int i = 0; i < num_of_num; i++) {
         lfu.lookup_update(num[i]);
-        pca.lookup_update(num, i);
+        pca.lookup_update(num[i], hash_entry_elem, i);
 
         #ifndef OPTIMIZATION
             graph.add_hits(lfu.hits_counter, pca.hits_counter);
