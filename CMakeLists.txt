@@ -16,7 +16,7 @@ add_executable(pca pca.cpp)
 add_executable(both main.cpp graph/graph.cpp)
 target_include_directories(lfu PRIVATE cache)
 target_include_directories(pca PRIVATE cache)
-target_include_directories(pca PRIVATE cache graph)
+target_include_directories(both PRIVATE cache graph)
 
 if(OPTIMIZATION)
     target_compile_definitions(lfu PRIVATE OPTIMIZATION=1)
