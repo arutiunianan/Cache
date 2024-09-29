@@ -64,7 +64,7 @@ private:
         return curr_size == max_size;
     }
 
-    T most_far_elem(T list_elem, std::unordered_map<T, std::list<int>> hash_entry_elem) {
+    T most_far_elem(T list_elem, std::unordered_map<T, std::list<int>>& hash_entry_elem) {
         T far_elem = -1;
         if(hash_entry_elem[list_elem].begin() == hash_entry_elem[list_elem].end()) {
             return list_elem;
@@ -137,23 +137,6 @@ public:
 
         KeyT key = list_elem; //in this hash: key = value
         hash_entry_elem[list_elem].pop_front();
-
-        /*std::list<int>::iterator p = hash_entry_elem[list_elem].begin();
-        std::cout << list_elem <<": ";
-        while(p != hash_entry_elem[list_elem].end()) {
-            std::cout << *p << " ";
-            p++;
-        }
-        std::cout << "\n";
-        
-
-        std::list<int>::iterator pip = hash_entry_elem[list_elem].begin();
-        std::cout << list_elem <<": ";
-        while(pip != hash_entry_elem[list_elem].end()) {
-            std::cout << *pip << " ";
-            pip++;
-        }
-        std::cout << "\n\n";*/
 
         auto hit = hash.find(key);
         if(hit == hash.end()) {
