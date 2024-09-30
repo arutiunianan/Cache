@@ -11,7 +11,7 @@ int main() {
         std::ifstream test_file;
         test_file.open("test/test.txt");
         test_file >> max_size >> num_of_num;
-        int num[num_of_num];
+        std::vector<int> num(num_of_num);
 
         for(int i = 0; i < num_of_num; i++) {
             test_file >> num[i];
@@ -19,7 +19,7 @@ int main() {
         }
     #else
         std::cin >> max_size >> num_of_num;
-        int num[num_of_num];
+        std::vector<int> num(num_of_num);
 
         for(int i = 0; i < num_of_num; i++) {
             std::cin >> num[i];

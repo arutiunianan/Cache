@@ -19,9 +19,12 @@ private:
 
     using it_list = typename std::list<T>::iterator; 
     struct hash_elem_t {
-        it_list iter;
+        it_list cache_iter;
+        it_list counter_iter;
         int     counter;
-        hash_elem_t(it_list it): iter(it), 
+        hash_elem_t(it_list cache_it, it_list counter_it): 
+                                 cache_iter(cache_it),
+                                 counter_iter(counter_it),
                                  counter(1){}
         hash_elem_t():           counter(0){}
     };
@@ -34,7 +37,7 @@ private:
     #endif
 
 public:
-    LFU_cache_t(int m_size, int a_size, T* data):
+    LFU_cache_t(int m_size, int a_size, std::vector<int>& data):
         max_size(m_size) {
         #ifndef OPTIMIZATION
             log.open("logs/lfu_log.txt");
@@ -48,21 +51,6 @@ public:
                 log << data[i] << " ";
             }
             log << "\n\n";
-        #endif
-    }
-
-    ~LFU_cache_t() {
-        cache.clear();
-        hash.clear();
-
-        max_size     = 0xDEAD;
-        curr_size    = 0xDEAD;
-        hits_counter = 0xDEAD;
-
-        #ifndef OPTIMIZATION
-            log.close();
-            number_of_call = 0xDEAD;
-            errors         = 0xDEAD;
         #endif
     }
 
@@ -84,9 +72,10 @@ private:
             }
         #endif
 
-        counter_list[hash[key].counter].remove(key);
+        counter_list[hash[key].counter].erase(hash[key].counter_iter);
         hash[key].counter++;
         counter_list[hash[key].counter].push_front(key);
+        hash[key].counter_iter = counter_list[hash[key].counter].begin();
 
         if(counter_list[min_counter].size() == 0) {
             min_counter++;
@@ -124,7 +113,7 @@ public:
         if(hit == hash.end()) {
             if(is_cache_full()) {
                 KeyT erase_key = counter_list[min_counter].back();
-                cache.erase(hash[erase_key].iter);
+                cache.erase(hash[erase_key].cache_iter);
                 hash.erase(erase_key);
                 counter_list[min_counter].pop_back();
             }
@@ -136,7 +125,7 @@ public:
             T add_elem = key;
             counter_list[min_counter].push_front(key);
             cache.push_front(add_elem);
-            hash_elem_t hash_elem(cache.begin());
+            hash_elem_t hash_elem(cache.begin(), counter_list[min_counter].begin());
             hash[key] = hash_elem;
         }
         else {

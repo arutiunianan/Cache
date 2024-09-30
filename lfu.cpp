@@ -2,7 +2,11 @@
 #include "cache/pca_cache.h"
 #include "graph/graph.h"
 
+#include <ctime>
+
 int main() {
+    unsigned int start_time = clock();
+
     int max_size;
     int num_of_num;
     
@@ -10,14 +14,14 @@ int main() {
         std::ifstream test_file;
         test_file.open("test/test.txt");
         test_file >> max_size >> num_of_num;
-        int num[num_of_num];
+        std::vector<int> num(num_of_num);
 
         for(int i = 0; i < num_of_num; i++) {
             test_file >> num[i];
         }
     #else
         std::cin >> max_size >> num_of_num;
-        int num[num_of_num];
+        std::vector<int> num(num_of_num);
 
         for(int i = 0; i < num_of_num; i++) {
             std::cin >> num[i];
@@ -28,6 +32,8 @@ int main() {
     for(int i = 0; i < num_of_num; i++) {
         lfu.lookup_update(num[i]);
     }
+
+    unsigned int end_time = clock();
     std::cout << "\nlfu: " << lfu.hits_counter << "\n";
 
     return 0;

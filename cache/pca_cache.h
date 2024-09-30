@@ -25,7 +25,7 @@ private:
     #endif
 
 public:
-    PCA_cache_t(int m_size, int a_size, T* data): 
+    PCA_cache_t(int m_size, int a_size, std::vector<int>& data): 
         max_size(m_size), 
         arr_size(a_size) {
         #ifndef OPTIMIZATION
@@ -40,22 +40,6 @@ public:
                 log << data[i] << " ";
             }
             log << "\n\n";
-        #endif
-    }
-
-    ~PCA_cache_t() {
-        cache.clear();
-        hash.clear();
-
-        max_size     = 0xDEAD;
-        curr_size    = 0xDEAD;
-        arr_size     = 0xDEAD;
-        hits_counter = 0xDEAD;
-
-        #ifndef OPTIMIZATION
-            log.close();
-            number_of_call = 0xDEAD;
-            errors         = 0xDEAD;
         #endif
     }
 
