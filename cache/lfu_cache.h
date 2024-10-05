@@ -54,6 +54,8 @@ public:
         #endif
     }
 
+    ~LFU_cache_t() {}
+
 private:
     bool is_cache_full() {
         return curr_size == max_size;

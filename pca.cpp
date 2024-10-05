@@ -9,7 +9,7 @@ int main() {
 
     #ifdef TEST
         std::ifstream test_file;
-        test_file.open("test/test.txt");
+        test_file.open("../test/test.txt");
         test_file >> max_size >> num_of_num;
         std::vector<int> num(num_of_num);
 
@@ -31,8 +31,8 @@ int main() {
     for(int i = 0; i < num_of_num; i++) {
         pca.lookup_update(num[i], hash_entry_elem, i);
     }
-
-    std::cout << "\npca: " << pca.hits_counter << "\n\n";
+    
+    std::cout << "\n" << pca.hits_counter << "\n\n";
 
     return 0;
 }

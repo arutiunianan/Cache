@@ -2,17 +2,17 @@
 #include "cache/pca_cache.h"
 #include "graph/graph.h"
 
-#include <ctime>
+#include <chrono>
 
 int main() {
-    unsigned int start_time = clock();
+    auto begin = std::chrono::steady_clock::now();
 
     int max_size;
     int num_of_num;
     
     #ifdef TEST
         std::ifstream test_file;
-        test_file.open("test/test.txt");
+        test_file.open("../test/test.txt");
         test_file >> max_size >> num_of_num;
         std::vector<int> num(num_of_num);
 
@@ -33,8 +33,12 @@ int main() {
         lfu.lookup_update(num[i]);
     }
 
-    unsigned int end_time = clock();
-    std::cout << "\nlfu: " << lfu.hits_counter << "\n";
+    auto end = std::chrono::steady_clock::now();
+  
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+
+    std::cout << "\n" << lfu.hits_counter << "\n";
 
     return 0;
 }

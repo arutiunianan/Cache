@@ -11,7 +11,7 @@ int main() {
 
     #ifdef TEST
         std::ifstream test_file;
-        test_file.open("test/test.txt");
+        test_file.open("../test/test.txt");
         test_file >> max_size >> num_of_num;
         std::vector<int> num(num_of_num);
 
@@ -43,8 +43,8 @@ int main() {
         #endif
     }
 
-    std::cout << "\nlfu: " << lfu.hits_counter << "\n";     
-    std::cout << "\npca: " << pca.hits_counter << "\n\n";
+    std::cout << "\n" << lfu.hits_counter << "\n";     
+    std::cout << "\n" << pca.hits_counter << "\n";
     #ifndef OPTIMIZATION
         graph.print_graph();
     #endif

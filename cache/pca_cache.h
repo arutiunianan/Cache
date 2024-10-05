@@ -43,6 +43,8 @@ public:
         #endif
     }
 
+    ~PCA_cache_t() {}
+
 private:
     bool is_cache_full() {
         return curr_size == max_size;
@@ -50,16 +52,20 @@ private:
 
     T most_far_elem(T list_elem, std::unordered_map<T, std::list<int>>& hash_entry_elem) {
         T far_elem = -1;
-        if(hash_entry_elem[list_elem].begin() == hash_entry_elem[list_elem].end()) {
+        if(hash_entry_elem[list_elem].empty()) {
             return list_elem;
         }
 
         it_list elem = cache.end();
         for(int i = 0; i < curr_size; i++) {
-            elem--;
-            T curr_elem = *elem;
-            if(hash_entry_elem[curr_elem].begin() == hash_entry_elem[curr_elem].end() 
-               || hash_entry_elem[curr_elem].front() >= far_elem) {
+            T curr_elem = *--elem;
+            auto& entry = hash_entry_elem[curr_elem];
+
+            if(entry.empty()) {
+                return curr_elem;
+            }
+
+            if(entry.front() >= far_elem) {
                 far_elem = curr_elem;
             }
         }
