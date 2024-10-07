@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <cassert>
+#include <queue>
 #include <unordered_map>
 
 #ifndef OPTIMIZATION

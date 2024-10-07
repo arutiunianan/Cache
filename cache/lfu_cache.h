@@ -74,10 +74,11 @@ private:
             }
         #endif
 
-        counter_list[hash[key].counter].erase(hash[key].counter_iter);
-        hash[key].counter++;
-        counter_list[hash[key].counter].push_front(key);
-        hash[key].counter_iter = counter_list[hash[key].counter].begin();
+        auto& hash_counter = hash[key].counter;
+        counter_list[hash_counter].erase(hash[key].counter_iter);
+        hash_counter++;
+        counter_list[hash_counter].push_front(key);
+        hash[key].counter_iter = counter_list[hash_counter].begin();
 
         if(counter_list[min_counter].size() == 0) {
             min_counter++;
@@ -113,11 +114,12 @@ public:
         KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {
+            auto& min_counter_list = counter_list[min_counter];
             if(is_cache_full()) {
-                KeyT erase_key = counter_list[min_counter].back();
+                KeyT erase_key = min_counter_list.back();
                 cache.erase(hash[erase_key].cache_iter);
                 hash.erase(erase_key);
-                counter_list[min_counter].pop_back();
+                min_counter_list.pop_back();
             }
             else {
                 curr_size++;
@@ -125,9 +127,9 @@ public:
 
             min_counter = 1;
             T add_elem = key;
-            counter_list[min_counter].push_front(key);
+            min_counter_list.push_front(key);
             cache.push_front(add_elem);
-            hash_elem_t hash_elem(cache.begin(), counter_list[min_counter].begin());
+            hash_elem_t hash_elem(cache.begin(), min_counter_list.begin());
             hash[key] = hash_elem;
         }
         else {

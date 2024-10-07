@@ -50,50 +50,34 @@ private:
         return curr_size == max_size;
     }
 
-    T most_far_elem(T list_elem, std::unordered_map<T, std::list<int>>& hash_entry_elem) {
-        T far_elem = -1;
-        if(hash_entry_elem[list_elem].empty()) {
+    T most_far_elem(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
+        auto& list_elem_entry = hash_entry_elem[list_elem];
+        if(list_elem_entry.empty()) {
             return list_elem;
         }
 
+        T far_elem;
+        int far_elem_entry = -1;
         it_list elem = cache.end();
         for(int i = 0; i < curr_size; i++) {
             T curr_elem = *--elem;
+
             auto& entry = hash_entry_elem[curr_elem];
 
             if(entry.empty()) {
                 return curr_elem;
             }
 
-            if(entry.front() >= far_elem) {
+            if(entry.front() >= far_elem_entry) {
+                far_elem_entry = entry.front();
                 far_elem = curr_elem;
             }
         }
-        if(hash_entry_elem[list_elem].front() >= far_elem) {
+        if(list_elem_entry.front() >= far_elem_entry) {
             return list_elem;
         }
 
         return far_elem;
-    }
-
-    void update_elem_place(KeyT key) {
-        #ifndef OPTIMIZATION
-            if(cache.empty()) {
-                errors |= CACHE_IS_EMPTY;
-            }
-            if(hash.find(key) == hash.end()) {
-                errors |= HASH_HAST_THIS_KEY;
-            }
-            if(errors != 0) {
-                return;
-            }
-        #endif
-
-        auto eltit = hash[key];
-        if (eltit != cache.begin()) {
-            cache.splice(cache.begin(), cache,
-                    eltit, std::next(eltit));
-        }
     }
 
 #ifndef OPTIMIZATION
@@ -116,7 +100,7 @@ private:
 #endif
 
 public:
-    int lookup_update(T list_elem, std::unordered_map<T, std::list<int>>& hash_entry_elem, int i) {
+    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, int i) {
         #ifndef OPTIMIZATION
             assert(log);
 
@@ -126,7 +110,7 @@ public:
         #endif
 
         KeyT key = list_elem; //in this hash: key = value
-        hash_entry_elem[list_elem].pop_front();
+        hash_entry_elem[list_elem].pop();
 
         auto hit = hash.find(key);
         if(hit == hash.end()) {
@@ -140,7 +124,6 @@ public:
                     #endif
                 }
                 cache.erase(hash[far_elem]);
-                hash.erase(far_elem);
             }
             else {
                 curr_size++;
@@ -148,11 +131,14 @@ public:
  
             cache.push_front(key);
             hash[key] = cache.begin();
+
+            #ifndef OPTIMIZATION
+                return chech_errors(i);
+            #else
+                return 1;
+            #endif
         }
-        else {
-            hits_counter++;
-            update_elem_place(key);
-        }
+        hits_counter++;
 
         #ifndef OPTIMIZATION
             return chech_errors(i);
