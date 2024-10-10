@@ -114,12 +114,11 @@ public:
         KeyT key = list_elem; //in this hash: key = value
         auto hit = hash.find(key);
         if(hit == hash.end()) {
-            auto& min_counter_list = counter_list[min_counter];
             if(is_cache_full()) {
-                KeyT erase_key = min_counter_list.back();
+                KeyT erase_key = counter_list[min_counter].back();
                 cache.erase(hash[erase_key].cache_iter);
                 hash.erase(erase_key);
-                min_counter_list.pop_back();
+                counter_list[min_counter].pop_back();
             }
             else {
                 curr_size++;
@@ -127,9 +126,9 @@ public:
 
             min_counter = 1;
             T add_elem = key;
-            min_counter_list.push_front(key);
+            counter_list[min_counter].push_front(key);
             cache.push_front(add_elem);
-            hash_elem_t hash_elem(cache.begin(), min_counter_list.begin());
+            hash_elem_t hash_elem(cache.begin(), counter_list[min_counter].begin());
             hash[key] = hash_elem;
         }
         else {
