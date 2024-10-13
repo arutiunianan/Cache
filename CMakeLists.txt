@@ -8,7 +8,7 @@ add_compile_options(
     -Wpedantic
 )
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 add_executable(lfu lfu.cpp)

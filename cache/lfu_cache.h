@@ -104,8 +104,6 @@ private:
 public:
     int lookup_update(T list_elem) {
         #ifndef OPTIMIZATION
-            assert(log);
-
             if(chech_errors()) {
                 return errors;
             }

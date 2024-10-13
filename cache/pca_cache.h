@@ -102,8 +102,6 @@ private:
 public:
     int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, int i) {
         #ifndef OPTIMIZATION
-            assert(log);
-
             if(chech_errors(i)) {
                 return errors;
             }
@@ -124,6 +122,7 @@ public:
                     #endif
                 }
                 cache.erase(hash[far_elem]);
+                hash.erase(far_elem);
             }
             else {
                 curr_size++;
