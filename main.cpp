@@ -1,6 +1,6 @@
 #include "cache/lfu_cache.h"
 #include "cache/pca_cache.h"
-#ifndef OPTIMIZATION
+#ifdef NO_OPTIMIZATION
     #include "graph/graph.h"
 #endif
 
@@ -57,7 +57,7 @@ int main() {
             hash_entry_elem[num[i]].push(i);
         }
 
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             Graph graph;
         #endif
         LFU_cache_t<int> lfu(max_size, num_of_num, num);
@@ -66,14 +66,14 @@ int main() {
             lfu.lookup_update(num[i]);
             pca.lookup_update(num[i], hash_entry_elem, i);
 
-            #ifndef OPTIMIZATION
+            #ifdef NO_OPTIMIZATION
                 graph.add_hits(lfu.hits_counter, pca.hits_counter);
             #endif
         }
 
         std::cout << "\n" << lfu.hits_counter << "\n";     
         std::cout << "\n" << pca.hits_counter << "\n";
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             graph.print_graph();
         #endif
     #endif

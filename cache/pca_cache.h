@@ -18,7 +18,7 @@ private:
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
 
-    #ifndef OPTIMIZATION
+    #ifdef NO_OPTIMIZATION
         std::ofstream log;
         int    number_of_call = 1;
         int    errors         = 0;
@@ -28,7 +28,7 @@ public:
     PCA_cache_t(int m_size, int a_size, std::vector<int>& data): 
         max_size(m_size), 
         arr_size(a_size) {
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             log.open("logs/pca_log.txt");
 
             log << "=======================================\n";
@@ -80,7 +80,7 @@ private:
         return far_elem;
     }
 
-#ifndef OPTIMIZATION
+#ifdef NO_OPTIMIZATION
     int chech_errors(int i) {
         if(i < 0) {
             errors |= NEGATIVE_INDEX_OF_DATA;
@@ -101,7 +101,7 @@ private:
 
 public:
     int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, int i) {
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             if(chech_errors(i)) {
                 return errors;
             }
@@ -115,7 +115,7 @@ public:
             if(is_cache_full()) {
                 int far_elem = most_far_elem(list_elem, hash_entry_elem);
                 if(far_elem == list_elem) {
-                    #ifndef OPTIMIZATION
+                    #ifdef NO_OPTIMIZATION
                         return chech_errors(i);
                     #else
                         return 1;
@@ -131,7 +131,7 @@ public:
             cache.push_front(key);
             hash[key] = cache.begin();
 
-            #ifndef OPTIMIZATION
+            #ifdef NO_OPTIMIZATION
                 return chech_errors(i);
             #else
                 return 1;
@@ -139,7 +139,7 @@ public:
         }
         hits_counter++;
 
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             return chech_errors(i);
         #endif
     }

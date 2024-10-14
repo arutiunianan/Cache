@@ -30,7 +30,7 @@ private:
     };
     std::unordered_map<KeyT, hash_elem_t> hash;
 
-    #ifndef OPTIMIZATION
+    #ifdef NO_OPTIMIZATION
         std::ofstream log;
         int    number_of_call = 1;
         int    errors         = 0;
@@ -39,7 +39,7 @@ private:
 public:
     LFU_cache_t(int m_size, int a_size, std::vector<int>& data):
         max_size(m_size) {
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             log.open("logs/lfu_log.txt");
 
             log << "=======================================\n";
@@ -62,7 +62,7 @@ private:
     }
 
     void update_elem_place(KeyT key) {
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             if(cache.empty()) {
                 errors |= CACHE_IS_EMPTY;
             }
@@ -85,7 +85,7 @@ private:
         }
     }
 
-    #ifndef OPTIMIZATION
+    #ifdef NO_OPTIMIZATION
         int chech_errors() {
             if(max_size < 0) {
                 errors |= NEGATIVE_CURR_SIZE;
@@ -103,7 +103,7 @@ private:
 
 public:
     int lookup_update(T list_elem) {
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             if(chech_errors()) {
                 return errors;
             }
@@ -134,7 +134,7 @@ public:
             update_elem_place(key);
         }
         
-        #ifndef OPTIMIZATION
+        #ifdef NO_OPTIMIZATION
             return chech_errors();
         #endif
     }

@@ -9,7 +9,7 @@
 #include <queue>
 #include <unordered_map>
 
-#ifndef OPTIMIZATION
+#ifdef NO_OPTIMIZATION
     enum Errors
     {
         NO_ERRORS              = 0,
