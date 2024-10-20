@@ -7,14 +7,15 @@
 int main() {
     int max_size;
     int num_of_num;
-    int answer;
     std::unordered_map<int, std::queue<int>> hash_entry_elem;
 
     #ifdef TEST
-        std::string path = "../test/unit_tests";
-        for(const auto& file: std::filesystem::directory_iterator(path)) {
+        int answer;
+        std::string path = "../test/unit_tests/test";
+        std::vector<int> test_num = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        for(const auto& test: test_num) {
             std::ifstream test_file;
-            test_file.open(file.path());
+            test_file.open(path + std::to_string(test) + ".txt");
             test_file >> max_size >> num_of_num;
             std::vector<int> num(num_of_num);
 
@@ -23,28 +24,28 @@ int main() {
                 hash_entry_elem[num[i]].push(i);
             }
 
-            LFU_cache_t<int> lfu(max_size, num_of_num, num);
-            PCA_cache_t<int> pca(max_size, num_of_num, num);
+            LFU_cache_t<int> lfu(max_size);
+            PCA_cache_t<int> pca(max_size, num_of_num);
             for(int i = 0; i < num_of_num; i++) {
                 lfu.lookup_update(num[i]);
-                pca.lookup_update(num[i], hash_entry_elem, i);
+                pca.lookup_update(num[i], hash_entry_elem);
             }
 
             test_file >> answer;
             if(lfu.hits_counter == answer) {
-                std::cout << "Successful lfu test - " << file.path() << "\n";
+                std::cout << "Successful lfu test - " << path + std::to_string(test) + ".txt" << "\n";
             }
             else {
-                std::cout << "Failed lfu test - " << file.path() << "\n";
+                std::cout << "Failed lfu test - " << path + std::to_string(test) + ".txt" << "\n";
                 std::cout << answer << " " << lfu.hits_counter << "\n";
             }
 
             test_file >> answer;
             if(pca.hits_counter == answer) {
-                std::cout << "Successful pca test - " << file.path() << "\n";
+                std::cout << "Successful pca test - " << path + std::to_string(test) + ".txt" << "\n";
             }
             else {
-                std::cout << "Failed pca test - " << file.path() << "\n";
+                std::cout << "Failed pca test - " << path + std::to_string(test) + ".txt" << "\n";
                 std::cout << answer << " " << pca.hits_counter << "\n";
             }
         }
@@ -60,11 +61,19 @@ int main() {
         #ifdef NO_OPTIMIZATION
             Graph graph;
         #endif
-        LFU_cache_t<int> lfu(max_size, num_of_num, num);
-        PCA_cache_t<int> pca(max_size, num_of_num, num);
+        LFU_cache_t<int> lfu(max_size 
+                            #ifdef NO_OPTIMIZATION
+                                ,num_of_num, num
+                            #endif
+                            );
+        PCA_cache_t<int> pca(max_size, num_of_num
+                            #ifdef NO_OPTIMIZATION
+                                , num
+                            #endif
+                            );
         for(int i = 0; i < num_of_num; i++) {
             lfu.lookup_update(num[i]);
-            pca.lookup_update(num[i], hash_entry_elem, i);
+            pca.lookup_update(num[i], hash_entry_elem);
 
             #ifdef NO_OPTIMIZATION
                 graph.add_hits(lfu.hits_counter, pca.hits_counter);

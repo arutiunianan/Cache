@@ -37,7 +37,11 @@ private:
     #endif
 
 public:
-    LFU_cache_t(int m_size, int a_size, std::vector<int>& data):
+    LFU_cache_t(int m_size 
+                #ifdef NO_OPTIMIZATION 
+                    ,int a_size, std::vector<int>& data 
+                #endif
+                ):
         max_size(m_size) {
         #ifdef NO_OPTIMIZATION
             log.open("logs/lfu_log.txt");
@@ -137,6 +141,7 @@ public:
         #ifdef NO_OPTIMIZATION
             return chech_errors();
         #endif
+        return 0;
     }
 
 };

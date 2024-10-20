@@ -25,7 +25,11 @@ private:
     #endif
 
 public:
-    PCA_cache_t(int m_size, int a_size, std::vector<int>& data): 
+    PCA_cache_t(int m_size, int a_size
+                #ifdef NO_OPTIMIZATION 
+                    , std::vector<int>& data 
+                #endif
+                ):
         max_size(m_size), 
         arr_size(a_size) {
         #ifdef NO_OPTIMIZATION
@@ -46,45 +50,30 @@ public:
     ~PCA_cache_t() {}
 
 private:
-    bool is_cache_full() {
+    inline bool is_cache_full() {
         return curr_size == max_size;
     }
 
     T most_far_elem(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
-        auto& list_elem_entry = hash_entry_elem[list_elem];
-        if(list_elem_entry.empty()) {
-            return list_elem;
-        }
+        const auto& list_elem_entry = hash_entry_elem[list_elem];
 
-        T far_elem;
-        int far_elem_entry = -1;
+        T far_elem = list_elem;
+        int far_elem_entry = list_elem_entry.front();
         it_list elem = cache.end();
         for(int i = 0; i < curr_size; i++) {
             T curr_elem = *--elem;
-
             auto& entry = hash_entry_elem[curr_elem];
-
-            if(entry.empty()) {
-                return curr_elem;
-            }
-
             if(entry.front() >= far_elem_entry) {
                 far_elem_entry = entry.front();
                 far_elem = curr_elem;
             }
-        }
-        if(list_elem_entry.front() >= far_elem_entry) {
-            return list_elem;
         }
 
         return far_elem;
     }
 
 #ifdef NO_OPTIMIZATION
-    int chech_errors(int i) {
-        if(i < 0) {
-            errors |= NEGATIVE_INDEX_OF_DATA;
-        }
+    int chech_errors() {
         if(max_size < 0) {
             errors |= NEGATIVE_CURR_SIZE;
         }
@@ -100,32 +89,36 @@ private:
 #endif
 
 public:
-    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, int i) {
+    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
         #ifdef NO_OPTIMIZATION
-            if(chech_errors(i)) {
+            if(chech_errors()) {
                 return errors;
             }
         #endif
 
         KeyT key = list_elem; //in this hash: key = value
-        hash_entry_elem[list_elem].pop();
+        auto& queue = hash_entry_elem[list_elem];
+        queue.pop();
 
         auto hit = hash.find(key);
         if(hit == hash.end()) {
+            if(queue.empty()) {
+                return 0;
+            }
             if(is_cache_full()) {
                 int far_elem = most_far_elem(list_elem, hash_entry_elem);
                 if(far_elem == list_elem) {
                     #ifdef NO_OPTIMIZATION
                         return chech_errors(i);
                     #else
-                        return 1;
+                        return 0;
                     #endif
                 }
                 cache.erase(hash[far_elem]);
                 hash.erase(far_elem);
             }
-            else {
-                curr_size++;
+            else { 
+                ++curr_size;
             }
  
             cache.push_front(key);
@@ -134,14 +127,20 @@ public:
             #ifdef NO_OPTIMIZATION
                 return chech_errors(i);
             #else
-                return 1;
+                return 0;
             #endif
         }
-        hits_counter++;
+        ++hits_counter;
+        if(queue.empty()) {
+            cache.erase(hash[list_elem]);
+            hash.erase(list_elem);
+            --curr_size;
+        }
 
         #ifdef NO_OPTIMIZATION
             return chech_errors(i);
         #endif
+        return 0;
     }
 };
 
