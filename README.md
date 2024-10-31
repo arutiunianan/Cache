@@ -65,6 +65,15 @@ python3.8 test/test_gen.py 100000
 cmake ../ -DNO_OPTIMIZATION=ON
 ```
 
+Для запуска lfu, pca и тестов соответсвенно:
+
+```
+./cache --a lfu
+./cache --a pca
+/test
+```
+
+
 ## Как выглядит результат работы программы?
 
 Для [теста](test/test.txt) график частоты попаданий будет иметь такой вид:

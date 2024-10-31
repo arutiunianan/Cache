@@ -61,7 +61,8 @@ private:
         int far_elem_entry = list_elem_entry.front();
         it_list elem = cache.end();
         for(int i = 0; i < curr_size; i++) {
-            T curr_elem = *--elem;
+            elem = std::prev(elem);
+            T curr_elem = *elem;
             auto& entry = hash_entry_elem[curr_elem];
             if(entry.front() >= far_elem_entry) {
                 far_elem_entry = entry.front();
