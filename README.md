@@ -70,7 +70,7 @@ cmake ../ -DNO_OPTIMIZATION=ON
 ```
 ./cache --a lfu
 ./cache --a pca
-/test
+./test
 ```
 
 

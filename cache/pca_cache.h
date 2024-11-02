@@ -5,8 +5,8 @@
 
 template <typename T, typename KeyT = int>
 class PCA_cache_t {
-public:
-    int hits_counter = 0;
+//public:
+//    int hits_counter = 0;
 
 private:
     int max_size;
@@ -25,14 +25,14 @@ private:
     #endif
 
 public:
-    PCA_cache_t(int m_size, int a_size
-                #ifdef NO_OPTIMIZATION 
-                    , std::vector<int>& data 
-                #endif
-                ):
+    PCA_cache_t(int m_size, int a_size):
         max_size(m_size), 
-        arr_size(a_size) {
-        #ifdef NO_OPTIMIZATION
+        arr_size(a_size) {}
+
+    #ifdef NO_OPTIMIZATION
+        PCA_cache_t(int m_size, int a_size, std::vector<int>& data):
+            max_size(m_size), 
+            arr_size(a_size) {
             log.open("logs/pca_log.txt");
 
             log << "=======================================\n";
@@ -44,17 +44,18 @@ public:
                 log << data[i] << " ";
             }
             log << "\n\n";
-        #endif
-    }
+        }
+    #endif
 
     ~PCA_cache_t() {}
 
 private:
-    inline bool is_cache_full() {
+    inline bool is_cache_full() const {
         return curr_size == max_size;
     }
 
     T most_far_elem(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
+        assert(!hash_entry_elem.empty() && "queue of hash is empty");
         const auto& list_elem_entry = hash_entry_elem[list_elem];
 
         T far_elem = list_elem;
@@ -81,9 +82,6 @@ private:
         if(curr_size < 0) {
             errors |= NEGATIVE_MAX_SIZE;
         }
-        if(hits_counter < 0) {
-            errors |= NEGATIVE_HITS_COUNTER;
-        }
         dump<T>(log, errors, cache, curr_size, &number_of_call);
         return errors;
     }
@@ -95,6 +93,9 @@ public:
             if(chech_errors()) {
                 return errors;
             }
+        #else
+            assert(max_size >= 0 && "max_size is neg");
+            assert(curr_size >= 0 && "curr_size is neg");
         #endif
 
         KeyT key = list_elem; //in this hash: key = value
@@ -127,11 +128,12 @@ public:
 
             #ifdef NO_OPTIMIZATION
                 return chech_errors(i);
-            #else
-                return 0;
             #endif
+            assert(max_size >= 0 && "max_size is neg");
+            assert(curr_size >= 0 && "curr_size is neg");
+            return 0;
+            
         }
-        ++hits_counter;
         if(queue.empty()) {
             cache.erase(hash[list_elem]);
             hash.erase(list_elem);
@@ -141,7 +143,9 @@ public:
         #ifdef NO_OPTIMIZATION
             return chech_errors(i);
         #endif
-        return 0;
+        assert(max_size >= 0 && "max_size is neg");
+        assert(curr_size >= 0 && "curr_size is neg");
+        return 1;
     }
 };
 

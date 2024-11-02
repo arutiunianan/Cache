@@ -6,10 +6,11 @@
 #include <cassert>
 
 class Graph {
-public:
+private:
     std::ofstream lfu;
     std::ofstream pca;
 
+public:
     Graph();
     void add_hits(size_t lfu_hits, size_t pca_hits);
     void print_graph();

@@ -5,8 +5,8 @@
 
 template <typename T, typename KeyT = int>
 class LFU_cache_t {
-public:
-    int hits_counter = 0;
+//public:
+//    int hits_counter = 0;
 
 private:
     int min_counter = 0;
@@ -37,13 +37,11 @@ private:
     #endif
 
 public:
-    LFU_cache_t(int m_size 
-                #ifdef NO_OPTIMIZATION 
-                    ,int a_size, std::vector<int>& data 
-                #endif
-                ):
-        max_size(m_size) {
-        #ifdef NO_OPTIMIZATION
+    LFU_cache_t(int m_size ): max_size(m_size) {}
+
+    #ifdef NO_OPTIMIZATION
+        LFU_cache_t(int m_size, int a_size, std::vector<int>& data):
+            max_size(m_size) {
             log.open("logs/lfu_log.txt");
 
             log << "=======================================\n";
@@ -55,13 +53,13 @@ public:
                 log << data[i] << " ";
             }
             log << "\n\n";
-        #endif
-    }
+        }
+    #endif
 
     ~LFU_cache_t() {}
 
 private:
-    bool is_cache_full() {
+    bool is_cache_full() const {
         return curr_size == max_size;
     }
 
@@ -76,6 +74,9 @@ private:
             if(errors) {
                 return;
             }
+        #else
+            assert(!cache.empty() && "cache us empty");
+            assert(hash.find(key) != hash.end() && "hash has't this key");
         #endif
 
         auto& hash_counter = hash[key].counter;
@@ -84,7 +85,7 @@ private:
         counter_list[hash_counter].push_front(key);
         hash[key].counter_iter = counter_list[hash_counter].begin();
 
-        if(counter_list[min_counter].size() == 0) {
+        if(counter_list[min_counter].empty()) {
             min_counter++;
         }
     }
@@ -97,9 +98,6 @@ private:
             if(curr_size < 0) {
                 errors |= NEGATIVE_MAX_SIZE;
             }
-            if(hits_counter < 0) {
-                errors |= NEGATIVE_HITS_COUNTER;
-            }
             dump<T>(log, errors, cache, curr_size, &number_of_call);
             return errors;
         }
@@ -111,6 +109,9 @@ public:
             if(chech_errors()) {
                 return errors;
             }
+        #else
+            assert(max_size >= 0 && "max_size is neg");
+            assert(curr_size >= 0 && "curr_size is neg");
         #endif
 
         KeyT key = list_elem; //in this hash: key = value
@@ -134,12 +135,16 @@ public:
             hash[key] = hash_elem;
         }
         else {
-            hits_counter++;
+            //hits_counter++;
             update_elem_place(key);
+            return 1;
         }
         
         #ifdef NO_OPTIMIZATION
             return chech_errors();
+        #else
+            assert(max_size >= 0 && "max_size is neg");
+            assert(curr_size >= 0 && "curr_size is neg");
         #endif
         return 0;
     }
