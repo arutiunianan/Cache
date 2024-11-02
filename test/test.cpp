@@ -8,19 +8,31 @@ TEST(Test, Subtestv) {
     int answer;
     std::unordered_map<int, std::queue<int>> hash_entry_elem;
 
-    int num_of_tests = 13;
+    int num_of_tests = 15;
     for(int i = 1; i <= num_of_tests; ++i) {
         std::string file_path  = std::string(CMAKE_CURRENT_SOURCE_DIR) + "/test/unit_tests/test" + 
                                  std::to_string(i) + ".txt";
         std::ifstream test_file;
         test_file.open(file_path);
+        assert(test_file);
 
-        test_file >> max_size >> num_of_num;
+        if(!(test_file >> max_size >> num_of_num)) {
+            std::cerr << "Incorrect input" << std::endl;
+            continue;
+        }
         std::vector<int> num(num_of_num);
     
+        bool flag = true;
         for(int i = 0; i < num_of_num; i++) {
-            test_file >> num[i];
+            if(!(test_file >> num[i])) {
+                flag = false;
+                break;
+            }
             hash_entry_elem[num[i]].push(i);
+        }
+        if(!flag) {
+            std::cerr << "Incorrect input" << std::endl;
+            continue;
         }
 
         LFU_cache_t<int> lfu(max_size);

@@ -10,11 +10,17 @@ void runLFU() {
     int num_of_num;
     int hits_counter = 0;
   
-    std::cin >> max_size >> num_of_num;
+    if(!(std::cin >> max_size >> num_of_num)) {
+        std::cerr << "Incorrect input" << std::endl;
+        return;
+    }
     std::vector<int> num(num_of_num);
 
     for(int i = 0; i < num_of_num; i++) {
-        std::cin >> num[i];
+        if(!(std::cin >> num[i])) {
+            std::cerr << "Incorrect input" << std::endl;
+            return;
+        }
     }
         
     #ifdef NO_OPTIMIZATION
@@ -35,11 +41,17 @@ void runPCA() {
     int hits_counter = 0;
     std::unordered_map<int, std::queue<int>> hash_entry_elem;
 
-    std::cin >> max_size >> num_of_num;
+    if(!(std::cin >> max_size >> num_of_num)) {
+        std::cerr << "Incorrect input" << std::endl;
+        return;
+    }
     std::vector<int> num(num_of_num);
 
     for(int i = 0; i < num_of_num; i++) {
-        std::cin >> num[i];
+        if(!(std::cin >> num[i])) {
+            std::cerr << "Incorrect input" << std::endl;
+            return;
+        }
         hash_entry_elem[num[i]].push(i);
     }
 
