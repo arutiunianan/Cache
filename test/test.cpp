@@ -17,21 +17,19 @@ TEST(Test, Subtestv) {
         assert(test_file);
 
         if(!(test_file >> max_size >> num_of_num)) {
-            std::cerr << "Incorrect input" << std::endl;
             continue;
         }
         std::vector<int> num(num_of_num);
     
         bool flag = true;
-        for(int i = 0; i < num_of_num; i++) {
-            if(!(test_file >> num[i])) {
+        for(int j = 0; j < num_of_num; j++) {
+            if(!(test_file >> num[j])) {
                 flag = false;
                 break;
             }
-            hash_entry_elem[num[i]].push(i);
+            hash_entry_elem[num[j]].push(j);
         }
         if(!flag) {
-            std::cerr << "Incorrect input" << std::endl;
             continue;
         }
 
@@ -40,15 +38,14 @@ TEST(Test, Subtestv) {
 
         int lfu_hits_counter = 0;
         int pca_hits_counter = 0;
-        for(int i = 0; i < num_of_num; i++) {
-            lfu_hits_counter += lfu.lookup_update(num[i]);
-            pca_hits_counter += pca.lookup_update(num[i], hash_entry_elem);
+        for(int j = 0; j < num_of_num; j++) {
+            lfu_hits_counter += lfu.lookup_update(num[j]);
+            pca_hits_counter += pca.lookup_update(num[j], hash_entry_elem);
         }
-
         test_file >> answer;
-        ASSERT_TRUE(lfu_hits_counter == answer && i);
+        ASSERT_TRUE(lfu_hits_counter == answer);
         test_file >> answer;
-        ASSERT_TRUE(pca_hits_counter == answer && i);
+        ASSERT_TRUE(pca_hits_counter == answer);
         test_file.close();
     }
 }
