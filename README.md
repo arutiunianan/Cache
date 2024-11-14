@@ -68,8 +68,8 @@ cmake ../ -DNO_OPTIMIZATION=ON
 Для запуска lfu, pca и тестов соответсвенно:
 
 ```
-./cache --a lfu
-./cache --a pca
+./lfu
+./pca
 ./test
 ```
 

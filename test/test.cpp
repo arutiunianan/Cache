@@ -39,8 +39,8 @@ TEST(Test, Subtestv) {
         int lfu_hits_counter = 0;
         int pca_hits_counter = 0;
         for(int j = 0; j < num_of_num; j++) {
-            lfu_hits_counter += lfu.lookup_update(num[j]);
-            pca_hits_counter += pca.lookup_update(num[j], hash_entry_elem);
+            lfu_hits_counter += lfu.lookup_update(num[j], slow_get_page);
+            pca_hits_counter += pca.lookup_update(num[j], hash_entry_elem, slow_get_page);
         }
         test_file >> answer;
         ASSERT_TRUE(lfu_hits_counter == answer);

@@ -12,7 +12,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 if(NO_OPTIMIZATION)
-    target_compile_definitions(cache PRIVATE NO_OPTIMIZATION=1)
+    target_compile_definitions(lfu PRIVATE NO_OPTIMIZATION=1)
+    target_compile_definitions(pca PRIVATE NO_OPTIMIZATION=1)
 endif()
 
 if(TEST)
@@ -23,12 +24,11 @@ if(TEST)
     target_include_directories(test PRIVATE ${GTEST_INCLUDE_DIRS})
     target_link_libraries(test GTest::GTest GTest::Main)
 else()
-    add_executable(cache main.cpp graph/graph.cpp)
-    target_include_directories(cache PRIVATE cache graph)
-    
-    find_package(Boost REQUIRED COMPONENTS program_options)
-    include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(cache Boost::program_options)
+    add_executable(lfu lfu.cpp graph/graph.cpp)
+    target_include_directories(lfu PRIVATE cache graph)
+
+    add_executable(pca pca.cpp graph/graph.cpp)
+    target_include_directories(pca PRIVATE cache graph)
 endif()
 
 set(CMAKE_BUILD_TYPE Debug)

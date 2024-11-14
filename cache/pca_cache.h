@@ -87,8 +87,9 @@ private:
     }
 #endif
 
-public:
-    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
+public:    
+    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, 
+                      std::function<T(KeyT)> slow_get_page) {
         #ifdef NO_OPTIMIZATION
             if(chech_errors()) {
                 return errors;
@@ -123,7 +124,7 @@ public:
                 ++curr_size;
             }
  
-            cache.push_front(key);
+            cache.push_front(slow_get_page(key));
             hash[key] = cache.begin();
 
             #ifdef NO_OPTIMIZATION

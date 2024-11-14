@@ -104,7 +104,7 @@ private:
     #endif
 
 public:
-    int lookup_update(T list_elem) {
+    int lookup_update(T list_elem, std::function<T(KeyT)> slow_get_page) {
         #ifdef NO_OPTIMIZATION
             if(chech_errors()) {
                 return errors;
@@ -128,14 +128,12 @@ public:
             }
 
             min_counter = 1;
-            T add_elem = key;
             counter_list[min_counter].push_front(key);
-            cache.push_front(add_elem);
+            cache.push_front(slow_get_page(key));
             hash_elem_t hash_elem(cache.begin(), counter_list[min_counter].begin());
             hash[key] = hash_elem;
         }
         else {
-            //hits_counter++;
             update_elem_place(key);
             return 1;
         }

@@ -8,6 +8,11 @@
 #include <cassert>
 #include <queue>
 #include <unordered_map>
+#include <functional>
+
+int slow_get_page(int key) {
+    return key;
+}
 
 #ifdef NO_OPTIMIZATION
     enum Errors
