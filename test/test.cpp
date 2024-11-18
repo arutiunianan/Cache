@@ -20,6 +20,9 @@ TEST(Test, Subtestv) {
             continue;
         }
         std::vector<int> num(num_of_num);
+
+        LFU_cache_t<int> lfu(max_size);
+        PCA_cache_t<int> pca(max_size, num_of_num);
     
         bool flag = true;
         for(int j = 0; j < num_of_num; j++) {
@@ -27,20 +30,19 @@ TEST(Test, Subtestv) {
                 flag = false;
                 break;
             }
-            hash_entry_elem[num[j]].push(j);
+            pca.push_hash_entry_elem(num[j], j);
         }
         if(!flag) {
             continue;
         }
 
-        LFU_cache_t<int> lfu(max_size);
-        PCA_cache_t<int> pca(max_size, num_of_num);
+        
 
         int lfu_hits_counter = 0;
         int pca_hits_counter = 0;
         for(int j = 0; j < num_of_num; j++) {
             lfu_hits_counter += lfu.lookup_update(num[j], slow_get_page);
-            pca_hits_counter += pca.lookup_update(num[j], hash_entry_elem, slow_get_page);
+            pca_hits_counter += pca.lookup_update(num[j], slow_get_page);
         }
         test_file >> answer;
         ASSERT_TRUE(lfu_hits_counter == answer);

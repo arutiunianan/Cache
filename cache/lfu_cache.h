@@ -5,9 +5,6 @@
 
 template <typename T, typename KeyT = int>
 class LFU_cache_t {
-//public:
-//    int hits_counter = 0;
-
 private:
     int min_counter = 0;
     std::unordered_map<KeyT, std::list<T>> counter_list;

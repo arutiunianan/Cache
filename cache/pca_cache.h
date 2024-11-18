@@ -5,9 +5,6 @@
 
 template <typename T, typename KeyT = int>
 class PCA_cache_t {
-//public:
-//    int hits_counter = 0;
-
 private:
     int max_size;
     int curr_size = 0;
@@ -17,6 +14,7 @@ private:
 
     using it_list = typename std::list<T>::iterator; 
     std::unordered_map<KeyT, it_list> hash;
+    std::unordered_map<T, std::queue<int>> hash_entry_elem;
 
     #ifdef NO_OPTIMIZATION
         std::ofstream log;
@@ -54,7 +52,7 @@ private:
         return curr_size == max_size;
     }
 
-    T most_far_elem(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem) {
+    T most_far_elem(T& list_elem) {
         assert(!hash_entry_elem.empty() && "queue of hash is empty");
         const auto& list_elem_entry = hash_entry_elem[list_elem];
 
@@ -87,8 +85,12 @@ private:
     }
 #endif
 
-public:    
-    int lookup_update(T& list_elem, std::unordered_map<T, std::queue<int>>& hash_entry_elem, 
+public:
+    void push_hash_entry_elem(T elem, int i) {
+        hash_entry_elem[elem].push(i);
+    }
+
+    int lookup_update(T& list_elem,
                       std::function<T(KeyT)> slow_get_page) {
         #ifdef NO_OPTIMIZATION
             if(chech_errors()) {
@@ -109,7 +111,7 @@ public:
                 return 0;
             }
             if(is_cache_full()) {
-                int far_elem = most_far_elem(list_elem, hash_entry_elem);
+                int far_elem = most_far_elem(list_elem);
                 if(far_elem == list_elem) {
                     #ifdef NO_OPTIMIZATION
                         return chech_errors(i);
